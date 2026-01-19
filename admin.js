@@ -409,12 +409,20 @@ async function loadRoutesMap() {
     const statusFilter = document.getElementById('routeStatusFilter')?.value || 'all';
     
     // Filter out cancelled bookings and show transport bookings with from/to
+    console.log('All bookings:', result.bookings.map(b => ({ id: b.id, service: b.service, serviceCategory: b.serviceCategory, from: b.from, to: b.to })));
+    
     let bookings = result.bookings.filter(b => 
         b.from && 
         b.to && 
-        (b.serviceCategory === 'transport' || b.service === 'transport' || b.service === 'vehicle_transport') && 
+        (b.serviceCategory === 'transport' || 
+         b.service === 'transport' || 
+         b.service === 'vehicle_transport' ||
+         b.service === 'Prijevoz i Dostava sa Instalacijom' ||
+         b.serviceCategory === 'Prijevoz i Dostava sa Instalacijom') && 
         b.status !== 'cancelled'
     );
+    
+    console.log('Filtered bookings for map:', bookings.map(b => ({ id: b.id, service: b.service, from: b.from, to: b.to })));
     
     // Apply status filter
     if (statusFilter !== 'all') {
