@@ -368,8 +368,26 @@ window.initAdminMap = function() {
     }
     
     try {
+        // Initialize map
+        const mapDiv = document.getElementById('routesMap');
+        if (mapDiv && !map) {
+            map = new google.maps.Map(mapDiv, {
+                zoom: 7,
+                center: { lat: 45.8150, lng: 15.9819 }, // Croatia center
+                mapTypeControl: true,
+                streetViewControl: false,
+                mapId: '6d85f719dc2c8d13578b742f'
+            });
+        }
+        
         directionsService = new google.maps.DirectionsService();
         console.log('Google Maps initialized for admin dashboard');
+        
+        // Load routes after map is ready
+        setTimeout(() => {
+            loadRoutesMap();
+        }, 500);
+        
     } catch (error) {
         console.error('Error initializing Google Maps:', error);
     }
