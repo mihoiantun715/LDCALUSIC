@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup - LD ČALUŠIĆ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notification.css">
+    <style>
+        .setup-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .setup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .setup-header h1 {
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+        .setup-header p {
+            color: var(--text-light);
+        }
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .form-group input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .setup-btn {
+            background: var(--primary-blue);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .setup-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+        .setup-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .warning-box p {
+            margin: 0;
+            color: #856404;
+        }
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .success-box p {
+            margin: 0;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1>🔐 Admin Setup</h1>
+            <p>Create the first admin account for your system</p>
+        </div>
+
+        <div class="warning-box">
+            <p><strong>⚠️ Important:</strong> This page should only be used ONCE to create the first admin account. After setup, this page will be disabled.</p>
+        </div>
+
+        <form class="setup-form" id="adminSetupForm">
+            <div class="form-group">
+                <label for="adminEmail">Admin Email</label>
+                <input type="email" id="adminEmail" required placeholder="admin@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" required minlength="8" placeholder="Min 8 characters">
+            </div>
+
+            <div class="form-group">
+                <label for="adminName">Full Name</label>
+                <input type="text" id="adminName" required placeholder="John Doe">
+            </div>
+
+            <button type="submit" class="setup-btn" id="setupBtn">
+                Create Admin Account
+            </button>
+        </form>
+
+        <div class="success-box" id="successBox">
+            <p><strong>✅ Success!</strong> Admin account created. You can now login at <a href="admin-login.html">admin-login.html</a></p>
+        </div>
+    </div>
+
+    <script src="notification.js"></script>
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { doc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Check if admin already exists
+        async function checkAdminExists() {
+            const adminsSnapshot = await getDocs(collection(db, 'admins'));
+            return !adminsSnapshot.empty;
+        }
+
+        // Initialize
+        (async () => {
+            const adminExists = await checkAdminExists();
+            if (adminExists) {
+                document.querySelector('.setup-container').innerHTML = `
+                    <div class="setup-header">
+                        <h1>🔒 Setup Complete</h1>
+                        <p>Admin account already exists. This page is now disabled.</p>
+                        <a href="admin-login.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--primary-blue); color: white; text-decoration: none; border-radius: 5px;">Go to Admin Login</a>
+                    </div>
+                `;
+            }
+        })();
+
+        document.getElementById('adminSetupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const name = document.getElementById('adminName').value;
+            const setupBtn = document.getElementById('setupBtn');
+
+            setupBtn.disabled = true;
+            setupBtn.textContent = 'Creating...';
+
+            try {
+                // Check again if admin exists
+                const adminExists = await checkAdminExists();
+                if (adminExists) {
+                    notify.error('Admin account already exists!');
+                    setupBtn.disabled = false;
+                    setupBtn.textContent = 'Create Admin Account';
+                    return;
+                }
+
+                // Create user account
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Add to users collection
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: name,
+                    email: email,
+                    createdAt: new Date()
+                });
+
+                // Add to admins collection
+                await setDoc(doc(db, 'admins', user.uid), {
+                    role: 'admin',
+                    email: email,
+                    name: name,
+                    createdAt: new Date()
+                });
+
+                // Show success
+                document.getElementById('successBox').style.display = 'block';
+                document.getElementById('adminSetupForm').style.display = 'none';
+                notify.success('Admin account created successfully!');
+
+                // Redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Setup error:', error);
+                notify.error(error.message || 'Error creating admin account');
+                setupBtn.disabled = false;
+                setupBtn.textContent = 'Create Admin Account';
+            }
+        });
+    </script>
+</body>
+</html>

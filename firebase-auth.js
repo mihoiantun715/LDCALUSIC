@@ -292,6 +292,26 @@ export async function getUserBookings() {
     }
 }
 
+// Cancel booking
+export async function cancelBooking(bookingId) {
+    try {
+        const user = getCurrentUser();
+        if (!user) {
+            return { success: false, message: 'Morate biti prijavljeni' };
+        }
+        
+        await updateDoc(doc(db, 'bookings', bookingId), {
+            status: 'cancelled',
+            cancelledAt: serverTimestamp()
+        });
+        
+        return { success: true };
+    } catch (error) {
+        console.error('Cancel booking error:', error);
+        return { success: false, message: 'Greška pri otkazivanju rezervacije' };
+    }
+}
+
 // Admin: Get all bookings
 export async function getAllBookings() {
     try {

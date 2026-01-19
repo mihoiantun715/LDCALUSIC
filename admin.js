@@ -167,20 +167,27 @@ async function loadUsers() {
     }
 }
 
-function displayUsers(users) {
+async function displayUsers(users) {
     const tbody = document.getElementById('usersTableBody');
     
     if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Nema korisnika</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Nema korisnika</td></tr>';
         return;
     }
 
+    // Get admin list
+    const { collection, getDocs, db } = await import('./firebase-config.js');
+    const adminsSnapshot = await getDocs(collection(db, 'admins'));
+    const adminIds = new Set();
+    adminsSnapshot.forEach(doc => adminIds.add(doc.id));
+
     tbody.innerHTML = users.map(user => {
         const userBookings = allBookings.filter(b => b.userId === user.id).length;
+        const isAdmin = adminIds.has(user.id);
         return `
             <tr>
                 <td>#${user.id.slice(-6)}</td>
-                <td>${user.name}</td>
+                <td>${user.name} ${isAdmin ? '<span style="color: #e31e24; font-weight: bold;">👑 ADMIN</span>' : ''}</td>
                 <td>${user.email}</td>
                 <td>${user.phone || '-'}</td>
                 <td>${formatDate(user.createdAt)}</td>
@@ -189,6 +196,15 @@ function displayUsers(users) {
                     <button class="action-btn btn-view" onclick="viewUserDetails('${user.id}')">
                         <i class="fas fa-eye"></i>
                     </button>
+                    ${!isAdmin ? `
+                        <button class="action-btn btn-success" onclick="makeAdmin('${user.id}', '${user.email}', '${user.name}')" title="Make Admin">
+                            <i class="fas fa-user-shield"></i>
+                        </button>
+                    ` : `
+                        <button class="action-btn btn-danger" onclick="removeAdmin('${user.id}')" title="Remove Admin">
+                            <i class="fas fa-user-minus"></i>
+                        </button>
+                    `}
                 </td>
             </tr>
         `;
@@ -217,6 +233,53 @@ async function loadServiceStats() {
         document.getElementById('specialCount').textContent = bookings.filter(b => b.serviceCategory === 'special').length;
     } else {
         console.error('Error loading service stats:', result.message);
+    }
+}
+
+window.makeAdmin = async function(userId, email, name) {
+    if (!confirm(`Are you sure you want to make ${name} an admin?`)) {
+        return;
+    }
+    
+    try {
+        const { doc, setDoc, db } = await import('./firebase-config.js');
+        await setDoc(doc(db, 'admins', userId), {
+            role: 'admin',
+            email: email,
+            name: name,
+            createdAt: new Date()
+        });
+        
+        notify.success(`${name} is now an admin!`);
+        loadUsers();
+    } catch (error) {
+        console.error('Error making admin:', error);
+        notify.error('Error making user admin');
+    }
+}
+
+window.removeAdmin = async function(userId) {
+    if (!confirm('Are you sure you want to remove admin privileges from this user?')) {
+        return;
+    }
+    
+    try {
+        const { doc, deleteDoc, db } = await import('./firebase-config.js');
+        await deleteDoc(doc(db, 'admins', userId));
+        
+        notify.success('Admin privileges removed');
+        loadUsers();
+    } catch (error) {
+        console.error('Error removing admin:', error);
+        notify.error('Error removing admin privileges');
+    }
+}
+
+window.viewUserDetails = function(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (user) {
+        const userBookings = allBookings.filter(b => b.userId === userId);
+        alert(`User: ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone || 'N/A'}\nTotal Bookings: ${userBookings.length}`);
     }
 }
 

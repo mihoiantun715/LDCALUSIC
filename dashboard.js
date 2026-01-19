@@ -1,5 +1,5 @@
 // Import Firebase auth functions
-import { checkAuthState, getCurrentUser, createBooking, getUserBookings, logoutUser, updateUserEmail, sendPasswordReset } from './firebase-auth.js';
+import { checkAuthState, getCurrentUser, createBooking, getUserBookings, cancelBooking, logoutUser, updateUserEmail, sendPasswordReset } from './firebase-auth.js';
 
 const dashTranslations = {
     hr: {
@@ -448,8 +448,33 @@ async function loadBookings() {
                 </div>
             </div>
             ${booking.notes ? `<p style="margin-top: 15px; color: var(--text-light);"><strong>Napomena:</strong> ${booking.notes}</p>` : ''}
+            ${booking.status !== 'cancelled' && booking.status !== 'completed' ? `
+                <button class="cancel-booking-btn" data-booking-id="${booking.id}" style="margin-top: 15px; background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-times"></i> ${currentDashLang === 'hr' ? 'Otkaži Rezervaciju' : 'Cancel Booking'}
+                </button>
+            ` : ''}
         </div>
     `).join('');
+    
+    // Add cancel button event listeners
+    document.querySelectorAll('.cancel-booking-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const bookingId = e.target.closest('.cancel-booking-btn').getAttribute('data-booking-id');
+            const confirmMsg = currentDashLang === 'hr' ? 
+                'Jeste li sigurni da želite otkazati ovu rezervaciju?' : 
+                'Are you sure you want to cancel this booking?';
+            
+            if (confirm(confirmMsg)) {
+                const result = await cancelBooking(bookingId);
+                if (result.success) {
+                    notify.success(currentDashLang === 'hr' ? 'Rezervacija otkazana' : 'Booking cancelled');
+                    loadBookings();
+                } else {
+                    notify.error(result.message);
+                }
+            }
+        });
+    });
 }
 
 function getServiceName(service) {
