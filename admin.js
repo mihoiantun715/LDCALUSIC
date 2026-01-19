@@ -207,6 +207,9 @@ async function displayUsers(users) {
                             <i class="fas fa-user-minus"></i>
                         </button>
                     `}
+                    <button class="action-btn btn-delete" onclick="deleteUser('${user.id}', '${user.name}')" title="Delete User">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `;
@@ -274,6 +277,44 @@ window.removeAdmin = async function(userId) {
     } catch (error) {
         console.error('Error removing admin:', error);
         notify.error('Error removing admin privileges');
+    }
+}
+
+window.deleteUser = async function(userId, userName) {
+    if (!confirm(`Are you sure you want to delete user ${userName}? This action cannot be undone and will also delete all their bookings.`)) {
+        return;
+    }
+    
+    try {
+        const { doc, deleteDoc, collection, query, where, getDocs, db } = await import('./firebase-config.js');
+        
+        // Delete user's bookings first
+        const bookingsQuery = query(collection(db, 'bookings'), where('userId', '==', userId));
+        const bookingsSnapshot = await getDocs(bookingsQuery);
+        
+        const deletePromises = [];
+        bookingsSnapshot.forEach((bookingDoc) => {
+            deletePromises.push(deleteDoc(doc(db, 'bookings', bookingDoc.id)));
+        });
+        
+        // Delete admin role if exists
+        try {
+            await deleteDoc(doc(db, 'admins', userId));
+        } catch (e) {
+            // Admin role might not exist, ignore error
+        }
+        
+        // Delete user document
+        deletePromises.push(deleteDoc(doc(db, 'users', userId)));
+        
+        await Promise.all(deletePromises);
+        
+        notify.success(`User ${userName} deleted successfully`);
+        loadUsers();
+        loadOverview(); // Refresh stats
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        notify.error('Error deleting user');
     }
 }
 

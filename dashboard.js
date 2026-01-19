@@ -483,7 +483,18 @@ function getServiceName(service) {
         cleaning: 'Čišćenje',
         garden: 'Održavanje Zelenih Površina',
         rental: 'Najam Opreme',
-        special: 'Specijalne Usluge'
+        special: 'Specijalne Usluge',
+        vehicle_transport: 'Prijevoz motornih vozila',
+        furniture_appliances: 'Namještaj i kućanski aparati',
+        general_cargo: 'Paletirana i rasuti teret',
+        cargo: 'Paletirana i rasuti teret',
+        installation: 'Instalacija i deinstalacija aparata',
+        furniture_assembly: 'Dostava i ugradnja namještaja',
+        fitness_equipment: 'Fitness aparati',
+        general_transport: 'Transport robe po RH',
+        moving: 'Selidbe po EU',
+        space_clearing: 'Pražnjenje prostora',
+        waste_disposal: 'Odvoz otpada'
     };
     return serviceNames[service] || service;
 }
