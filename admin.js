@@ -41,6 +41,8 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
         
         if (section === 'bookings') {
             loadBookings();
+        } else if (section === 'routes') {
+            loadRoutesMap();
         } else if (section === 'users') {
             loadUsers();
         } else if (section === 'services') {
@@ -279,9 +281,147 @@ window.viewUserDetails = function(userId) {
     const user = allUsers.find(u => u.id === userId);
     if (user) {
         const userBookings = allBookings.filter(b => b.userId === userId);
-        alert(`User: ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone || 'N/A'}\nTotal Bookings: ${userBookings.length}`);
+        const modal = document.getElementById('userModal');
+        const details = document.getElementById('userDetails');
+        
+        details.innerHTML = `
+            <div class="detail-row">
+                <strong>Ime:</strong>
+                <span>${user.name}</span>
+            </div>
+            <div class="detail-row">
+                <strong>Email:</strong>
+                <span>${user.email}</span>
+            </div>
+            <div class="detail-row">
+                <strong>Telefon:</strong>
+                <span>${user.phone || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+                <strong>Datum Registracije:</strong>
+                <span>${formatDate(user.createdAt)}</span>
+            </div>
+            <div class="detail-row">
+                <strong>Ukupno Rezervacija:</strong>
+                <span>${userBookings.length}</span>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
     }
 }
+
+window.closeUserModal = function() {
+    document.getElementById('userModal').style.display = 'none';
+}
+
+// Google Maps for route visualization
+let map;
+let directionsService;
+let directionsRenderers = [];
+
+window.initAdminMap = function() {
+    if (typeof google === 'undefined' || !google.maps) {
+        console.log('Google Maps API not yet loaded');
+        return;
+    }
+    
+    try {
+        directionsService = new google.maps.DirectionsService();
+        console.log('Google Maps initialized for admin dashboard');
+    } catch (error) {
+        console.error('Error initializing Google Maps:', error);
+    }
+}
+
+async function loadRoutesMap() {
+    const result = await getAllBookings();
+    
+    if (!result.success) {
+        notify.error('Greška pri učitavanju ruta');
+        return;
+    }
+    
+    const bookings = result.bookings.filter(b => b.from && b.to && b.serviceCategory === 'transport');
+    
+    if (bookings.length === 0) {
+        document.getElementById('routesList').innerHTML = '<p class="no-data">Nema dostupnih ruta za prikaz</p>';
+        return;
+    }
+    
+    // Initialize map
+    const mapDiv = document.getElementById('routesMap');
+    if (!map) {
+        map = new google.maps.Map(mapDiv, {
+            zoom: 7,
+            center: { lat: 45.8150, lng: 15.9819 }, // Croatia center
+            mapTypeControl: true,
+            streetViewControl: false
+        });
+    }
+    
+    // Clear previous routes
+    directionsRenderers.forEach(renderer => renderer.setMap(null));
+    directionsRenderers = [];
+    
+    // Display routes
+    const colors = ['#1e5ba8', '#e31e24', '#43e97b', '#f093fb', '#4facfe'];
+    const routesList = document.getElementById('routesList');
+    routesList.innerHTML = '';
+    
+    bookings.forEach((booking, index) => {
+        const color = colors[index % colors.length];
+        
+        // Create route card
+        const routeCard = document.createElement('div');
+        routeCard.className = 'route-card';
+        routeCard.style.borderLeft = `4px solid ${color}`;
+        routeCard.innerHTML = `
+            <div class="route-header">
+                <h4>${booking.service || 'Transport'}</h4>
+                <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
+            </div>
+            <div class="route-details">
+                <div><i class="fas fa-map-marker-alt" style="color: green;"></i> <strong>Od:</strong> ${booking.from}</div>
+                <div><i class="fas fa-map-marker-alt" style="color: red;"></i> <strong>Do:</strong> ${booking.to}</div>
+                <div><i class="fas fa-calendar"></i> ${booking.date} ${booking.time || ''}</div>
+                <div><i class="fas fa-user"></i> ${booking.name || booking.email}</div>
+            </div>
+        `;
+        routesList.appendChild(routeCard);
+        
+        // Draw route on map
+        const directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false,
+            polylineOptions: {
+                strokeColor: color,
+                strokeWeight: 4,
+                strokeOpacity: 0.7
+            }
+        });
+        
+        directionsRenderers.push(directionsRenderer);
+        
+        directionsService.route({
+            origin: booking.from,
+            destination: booking.to,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, (response, status) => {
+            if (status === 'OK') {
+                directionsRenderer.setDirections(response);
+            } else {
+                console.error('Directions request failed:', status);
+            }
+        });
+    });
+}
+
+document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => {
+    const status = e.target.value;
+    // Filter routes based on status
+    loadRoutesMap();
+});
 
 function viewBooking(bookingId) {
     const booking = allBookings.find(b => b.id === bookingId);

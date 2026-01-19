@@ -56,11 +56,11 @@ service cloud.firestore {
       // Only admins can read admin list
       allow read: if isAdmin();
       
-      // Allow creating first admin if no admins exist
-      // After that, only existing admins can create new admins
-      allow create: if isAuthenticated() && 
-                       (adminId == request.auth.uid) &&
-                       (!exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+      // Allow creating first admin (for setup) OR existing admins can create new admins
+      allow create: if (isAuthenticated() && 
+                        adminId == request.auth.uid &&
+                        !exists(/databases/$(database)/documents/admins/$(request.auth.uid))) ||
+                       isAdmin();
       
       // Only admins can update/delete other admins
       allow update, delete: if isAdmin();
