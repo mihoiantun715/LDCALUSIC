@@ -221,6 +221,9 @@ export async function createBooking(bookingData) {
         const booking = {
             ...bookingData,
             userId: user.uid,
+            email: user.email,
+            name: user.displayName || user.email.split('@')[0],
+            phone: user.phoneNumber || '',
             status: 'pending',
             createdAt: serverTimestamp()
         };
