@@ -405,8 +405,33 @@ async function loadRoutesMap() {
     
     allRouteBookings = bookings;
     
+    // Always show position management header
+    const routesList = document.getElementById('routesList');
+    routesList.innerHTML = '';
+    
+    // Add position management header
+    const positionHeader = document.createElement('div');
+    positionHeader.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;';
+    positionHeader.innerHTML = `
+        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem;"><i class="fas fa-sort"></i> Upravljanje Pozicijama</h3>
+        <button onclick="autoAssignPositions()" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem; margin-right: 10px;">
+            <i class="fas fa-magic"></i> Auto Dodijeli Pozicije
+        </button>
+        <button onclick="splitRoutesForDrivers()" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+            <i class="fas fa-users"></i> Podijeli Rute za Vozače
+        </button>
+    `;
+    routesList.appendChild(positionHeader);
+    
     if (bookings.length === 0) {
-        document.getElementById('routesList').innerHTML = '<p class="no-data">Nema dostupnih ruta za prikaz</p>';
+        const noContractsDiv = document.createElement('div');
+        noContractsDiv.style.cssText = 'text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; margin-top: 20px;';
+        noContractsDiv.innerHTML = `
+            <i class="fas fa-route" style="font-size: 48px; color: #6c757d; margin-bottom: 15px; display: block;"></i>
+            <h4 style="color: #6c757d; margin: 0 0 10px 0;">Nema ugovora za prikaz</h4>
+            <p style="color: #999; margin: 0;">Trenutno nema transportnih rezervacija s polazištem i odredištem</p>
+        `;
+        routesList.appendChild(noContractsDiv);
         return;
     }
     
@@ -433,23 +458,7 @@ async function loadRoutesMap() {
         return a.position - b.position;
     });
     
-    // Display routes
-    const routesList = document.getElementById('routesList');
-    routesList.innerHTML = '';
-    
-    // Add position management header
-    const positionHeader = document.createElement('div');
-    positionHeader.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;';
-    positionHeader.innerHTML = `
-        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem;"><i class="fas fa-sort"></i> Upravljanje Pozicijama</h3>
-        <button onclick="autoAssignPositions()" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem; margin-right: 10px;">
-            <i class="fas fa-magic"></i> Auto Dodijeli Pozicije
-        </button>
-        <button onclick="splitRoutesForDrivers()" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
-            <i class="fas fa-users"></i> Podijeli Rute za Vozače
-        </button>
-    `;
-    routesList.appendChild(positionHeader);
+    // Display routes (routesList and positionHeader already declared above)
     
     bookings.forEach((booking, index) => {
         const isSelected = selectedRoutes.includes(booking.id);
