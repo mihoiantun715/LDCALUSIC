@@ -20,8 +20,8 @@ service cloud.firestore {
     
     // Users collection - stores user profile data
     match /users/{userId} {
-      // Anyone authenticated can read their own profile
-      allow read: if isAuthenticated() && isOwner(userId);
+      // Admins can read all users, users can read their own profile
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       
       // Users can create their own profile during registration
       allow create: if isAuthenticated() && isOwner(userId);
@@ -43,8 +43,9 @@ service cloud.firestore {
       allow create: if isAuthenticated() && 
                        request.resource.data.userId == request.auth.uid;
       
-      // Only admins can update bookings (status changes, etc.)
-      allow update: if isAdmin();
+      // Users can update their own bookings (to cancel), admins can update all
+      allow update: if isAuthenticated() && 
+                       (resource.data.userId == request.auth.uid || isAdmin());
       
       // Only admins can delete bookings
       allow delete: if isAdmin();
@@ -55,9 +56,14 @@ service cloud.firestore {
       // Only admins can read admin list
       allow read: if isAdmin();
       
-      // No one can create/update/delete admins through client
-      // This must be done through Firebase Admin SDK or Console
-      allow write: if false;
+      // Allow creating first admin if no admins exist
+      // After that, only existing admins can create new admins
+      allow create: if isAuthenticated() && 
+                       (adminId == request.auth.uid) &&
+                       (!exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+      
+      // Only admins can update/delete other admins
+      allow update, delete: if isAdmin();
     }
     
     // Public bookings - for non-authenticated users (contact form submissions)
