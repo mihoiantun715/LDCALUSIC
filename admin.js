@@ -641,7 +641,7 @@ document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => 
     loadRoutesMap();
 });
 
-function viewBooking(bookingId) {
+window.viewBooking = function(bookingId) {
     const booking = allBookings.find(b => b.id === bookingId);
     if (!booking) return;
 
