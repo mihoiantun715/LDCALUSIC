@@ -408,11 +408,11 @@ async function loadRoutesMap() {
     // Get status filter value
     const statusFilter = document.getElementById('routeStatusFilter')?.value || 'all';
     
-    // Filter out cancelled bookings and only show transport with from/to
+    // Filter out cancelled bookings and show transport bookings with from/to
     let bookings = result.bookings.filter(b => 
         b.from && 
         b.to && 
-        b.serviceCategory === 'transport' && 
+        (b.serviceCategory === 'transport' || b.service === 'transport' || b.service === 'vehicle_transport') && 
         b.status !== 'cancelled'
     );
     
