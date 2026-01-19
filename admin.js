@@ -1075,14 +1075,22 @@ async function deleteBookingConfirm() {
 }
 
 async function deleteBookingById(bookingId) {
-    const result = await deleteBooking(bookingId);
+    try {
+        const { deleteBooking } = await import('./firebase-auth.js');
+        const result = await deleteBooking(bookingId);
 
-    if (result.success) {
-        notify.success('Rezervacija uspješno obrisana!');
-        loadBookings();
-        loadOverview();
-    } else {
-        notify.error(result.message || 'Greška pri brisanju rezervacije');
+        if (result.success) {
+            notify.success('Rezervacija uspješno obrisana!');
+            loadBookings();
+            loadOverview();
+            loadRoutesMap(); // Refresh routes map
+            document.getElementById('bookingModal').style.display = 'none';
+        } else {
+            notify.error(result.message || 'Greška pri brisanju rezervacije');
+        }
+    } catch (error) {
+        console.error('Error deleting booking:', error);
+        notify.error('Greška pri brisanju rezervacije');
     }
 }
 
