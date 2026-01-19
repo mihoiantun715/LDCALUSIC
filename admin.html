@@ -382,18 +382,31 @@
     <script>
         // Load Google Maps API for route visualization
         function loadGoogleMapsAdmin() {
+            // Check if already loaded
+            if (window.google && window.google.maps) {
+                console.log('Google Maps already loaded');
+                return;
+            }
+            
             const script = document.createElement('script');
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVtCR6XBaKjIKtPPpo01IWu9e4lrjMRz8&libraries=places&callback=initAdminMap&loading=async';
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVtCR6XBaKjIKtPPpo01IWu9e4lrjMRz8&libraries=places&callback=initAdminMap';
             script.async = true;
             script.defer = true;
+            script.onerror = function() {
+                console.error('Failed to load Google Maps API');
+            };
             document.head.appendChild(script);
+            console.log('Loading Google Maps API for admin...');
         }
         
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadGoogleMapsAdmin);
-        } else {
-            loadGoogleMapsAdmin();
-        }
+        // Wait for admin.js to load first
+        setTimeout(() => {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadGoogleMapsAdmin);
+            } else {
+                loadGoogleMapsAdmin();
+            }
+        }, 100);
     </script>
 </body>
 </html>
