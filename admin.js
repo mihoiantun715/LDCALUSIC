@@ -558,6 +558,15 @@ async function loadRoutesMap() {
             if (status === 'OK') {
                 directionsRenderer.setDirections(response);
                 
+                // Store route data for distance/time display
+                if (response.routes[0] && response.routes[0].legs[0]) {
+                    const leg = response.routes[0].legs[0];
+                    booking.distance = leg.distance.text;
+                    booking.duration = leg.duration.text;
+                    booking.distanceValue = leg.distance.value;
+                    booking.durationValue = leg.duration.value;
+                }
+                
                 // Add custom numbered marker
                 if (booking.position !== null && booking.position !== undefined) {
                     const position = response.routes[0].legs[0].start_location;
@@ -939,6 +948,14 @@ window.viewBooking = function(bookingId) {
             <div class="detail-value">${booking.location || booking.from}${booking.to ? ' → ' + booking.to : ''}</div>
         </div>
         <div class="detail-row">
+            <div class="detail-label">Udaljenost:</div>
+            <div class="detail-value">${booking.distance || '-'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Trajanje:</div>
+            <div class="detail-value">${booking.duration || '-'}</div>
+        </div>
+        <div class="detail-row">
             <div class="detail-label">Opis Usluge:</div>
             <div class="detail-value">${booking.serviceDescription || booking.message || '-'}</div>
         </div>
@@ -1120,7 +1137,18 @@ function getStatusText(status) {
 }
 
 function formatDate(dateString) {
+    if (!dateString) return '-';
+    
+    // Handle Firestore timestamp
+    if (dateString && typeof dateString === 'object' && dateString.toDate) {
+        const date = dateString.toDate();
+        return date.toLocaleDateString('hr-HR') + ' ' + date.toLocaleTimeString('hr-HR', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // Handle regular date string
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    
     return date.toLocaleDateString('hr-HR') + ' ' + date.toLocaleTimeString('hr-HR', { hour: '2-digit', minute: '2-digit' });
 }
 
