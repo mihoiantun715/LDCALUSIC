@@ -377,6 +377,7 @@ window.initAdminMap = function() {
 
 let selectedRoutes = [];
 let allRouteBookings = [];
+let routeGroups = {}; // For splitting routes to multiple drivers
 
 async function loadRoutesMap() {
     const result = await getAllBookings();
@@ -425,9 +426,30 @@ async function loadRoutesMap() {
     directionsRenderers.forEach(renderer => renderer.setMap(null));
     directionsRenderers = [];
     
+    // Sort bookings by position
+    bookings.sort((a, b) => {
+        if (a.position === null) return 1;
+        if (b.position === null) return -1;
+        return a.position - b.position;
+    });
+    
     // Display routes
     const routesList = document.getElementById('routesList');
     routesList.innerHTML = '';
+    
+    // Add position management header
+    const positionHeader = document.createElement('div');
+    positionHeader.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;';
+    positionHeader.innerHTML = `
+        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem;"><i class="fas fa-sort"></i> Upravljanje Pozicijama</h3>
+        <button onclick="autoAssignPositions()" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem; margin-right: 10px;">
+            <i class="fas fa-magic"></i> Auto Dodijeli Pozicije
+        </button>
+        <button onclick="splitRoutesForDrivers()" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+            <i class="fas fa-users"></i> Podijeli Rute za Vozače
+        </button>
+    `;
+    routesList.appendChild(positionHeader);
     
     bookings.forEach((booking, index) => {
         const isSelected = selectedRoutes.includes(booking.id);
@@ -448,29 +470,45 @@ async function loadRoutesMap() {
         routeCard.style.background = isSelected ? 'rgba(227, 30, 36, 0.05)' : 'white';
         routeCard.setAttribute('data-booking-id', booking.id);
         
+        const positionBadge = booking.position !== null && booking.position !== undefined 
+            ? `<span style="background: #28a745; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">#${booking.position + 1}</span>` 
+            : '<span style="background: #6c757d; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem;">-</span>';
+        
+        const bookingTypeLabel = booking.bookingType ? `<span style="font-size: 0.8rem; color: #666; margin-left: 8px;">(${booking.locationLabel || booking.bookingType})</span>` : '';
+        
         routeCard.innerHTML = `
-            <div class="route-header">
-                <h4 style="font-size: 1rem; margin-bottom: 5px;">${serviceName}</h4>
+            <div class="route-header" style="display: flex; align-items: center; gap: 10px;">
+                ${positionBadge}
+                <div style="flex: 1;">
+                    <h4 style="font-size: 1rem; margin: 0;">${serviceName} ${bookingTypeLabel}</h4>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">${booking.name || booking.email}</div>
+                </div>
                 <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
             </div>
             <div class="route-summary" style="font-size: 0.9rem; color: #666; margin: 8px 0;">
-                <strong>Od:</strong> ${fromShort} → <strong>Do:</strong> ${toShort}
+                <strong>${booking.bookingType === 'destination' ? 'Do' : 'Od'}:</strong> ${booking.bookingType === 'destination' ? toShort : fromShort}
             </div>
-            <div class="route-actions" style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-small" onclick="event.stopPropagation(); toggleRouteSelection('${booking.id}')" style="flex: 1; padding: 6px 12px; font-size: 0.85rem; background: ${isSelected ? '#e31e24' : '#1e5ba8'}; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <div class="route-actions" style="display: flex; gap: 8px; margin-top: 10px;">
+                <button onclick="event.stopPropagation(); movePosition('${booking.id}', 'up')" style="padding: 6px 10px; font-size: 0.85rem; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;" ${booking.position === null || booking.position === 0 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button onclick="event.stopPropagation(); movePosition('${booking.id}', 'down')" style="padding: 6px 10px; font-size: 0.85rem; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;" ${booking.position === null || booking.position === bookings.length - 1 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button onclick="event.stopPropagation(); toggleRouteSelection('${booking.id}')" style="flex: 1; padding: 6px 12px; font-size: 0.85rem; background: ${isSelected ? '#e31e24' : '#1e5ba8'}; color: white; border: none; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-${isSelected ? 'check' : 'plus'}"></i> ${isSelected ? 'Odabrano' : 'Odaberi'}
                 </button>
-                <button class="btn-small" onclick="event.stopPropagation(); viewBooking('${booking.id}')" style="padding: 6px 12px; font-size: 0.85rem; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-eye"></i> Detalji
+                <button onclick="event.stopPropagation(); viewBooking('${booking.id}')" style="padding: 6px 12px; font-size: 0.85rem; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-eye"></i>
                 </button>
             </div>
         `;
         routesList.appendChild(routeCard);
         
-        // Draw route on map with clickable polyline
+        // Draw route on map with numbered markers
         const directionsRenderer = new google.maps.DirectionsRenderer({
             map: map,
-            suppressMarkers: false,
+            suppressMarkers: true, // We'll add custom numbered markers
             polylineOptions: {
                 strokeColor: color,
                 strokeWeight: isSelected ? 7 : 5,
@@ -482,13 +520,44 @@ async function loadRoutesMap() {
         
         directionsRenderers.push(directionsRenderer);
         
+        const origin = booking.bookingType === 'destination' ? booking.from : booking.from;
+        const destination = booking.bookingType === 'destination' ? booking.from : (booking.to || booking.from);
+        
         directionsService.route({
-            origin: booking.from,
-            destination: booking.to,
+            origin: origin,
+            destination: destination,
             travelMode: google.maps.TravelMode.DRIVING
         }, (response, status) => {
             if (status === 'OK') {
                 directionsRenderer.setDirections(response);
+                
+                // Add custom numbered marker
+                if (booking.position !== null && booking.position !== undefined) {
+                    const position = response.routes[0].legs[0].start_location;
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        label: {
+                            text: String(booking.position + 1),
+                            color: 'white',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        },
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 20,
+                            fillColor: color,
+                            fillOpacity: 1,
+                            strokeColor: 'white',
+                            strokeWeight: 3
+                        },
+                        title: `${booking.position + 1}. ${booking.name || booking.email}`
+                    });
+                    
+                    marker.addListener('click', () => {
+                        viewBooking(booking.id);
+                    });
+                }
                 
                 // Add click listener to polyline
                 google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
@@ -633,6 +702,166 @@ function optimizeSelectedRoutes() {
             notify.error('Greška pri optimizaciji rute');
         }
     });
+}
+
+// Move position up or down
+window.movePosition = async function(bookingId, direction) {
+    const booking = allRouteBookings.find(b => b.id === bookingId);
+    if (!booking) return;
+    
+    const currentPos = booking.position;
+    if (currentPos === null) {
+        notify.warning('Prvo dodijelite poziciju');
+        return;
+    }
+    
+    const newPos = direction === 'up' ? currentPos - 1 : currentPos + 1;
+    if (newPos < 0 || newPos >= allRouteBookings.length) return;
+    
+    // Find booking at target position
+    const targetBooking = allRouteBookings.find(b => b.position === newPos);
+    
+    try {
+        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        
+        // Swap positions
+        await updateDoc(doc(db, 'bookings', bookingId), { position: newPos });
+        if (targetBooking) {
+            await updateDoc(doc(db, 'bookings', targetBooking.id), { position: currentPos });
+        }
+        
+        notify.success('Pozicija ažurirana');
+        loadRoutesMap();
+    } catch (error) {
+        console.error('Error moving position:', error);
+        notify.error('Greška pri pomicanju pozicije');
+    }
+}
+
+// Auto assign positions
+window.autoAssignPositions = async function() {
+    if (!confirm('Automatski dodijeliti pozicije svim rutama?')) return;
+    
+    try {
+        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        
+        for (let i = 0; i < allRouteBookings.length; i++) {
+            await updateDoc(doc(db, 'bookings', allRouteBookings[i].id), { position: i });
+        }
+        
+        notify.success(`Dodijeljeno ${allRouteBookings.length} pozicija`);
+        loadRoutesMap();
+    } catch (error) {
+        console.error('Error auto assigning positions:', error);
+        notify.error('Greška pri dodjeljivanju pozicija');
+    }
+}
+
+// Split routes for multiple drivers
+window.splitRoutesForDrivers = function() {
+    const totalRoutes = allRouteBookings.filter(b => b.position !== null).length;
+    
+    if (totalRoutes === 0) {
+        notify.warning('Prvo dodijelite pozicije rutama');
+        return;
+    }
+    
+    const numDrivers = prompt(`Ukupno ruta: ${totalRoutes}\n\nNa koliko vozača želite podijeliti rute?`, '2');
+    if (!numDrivers || isNaN(numDrivers) || numDrivers < 1) return;
+    
+    const driversCount = parseInt(numDrivers);
+    const routesPerDriver = Math.ceil(totalRoutes / driversCount);
+    
+    // Create groups
+    routeGroups = {};
+    const sortedBookings = allRouteBookings.filter(b => b.position !== null).sort((a, b) => a.position - b.position);
+    
+    for (let i = 0; i < driversCount; i++) {
+        const start = i * routesPerDriver;
+        const end = Math.min(start + routesPerDriver, totalRoutes);
+        routeGroups[`Vozač ${i + 1}`] = sortedBookings.slice(start, end);
+    }
+    
+    // Display groups
+    displayRouteGroups();
+}
+
+function displayRouteGroups() {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;';
+    
+    let groupsHTML = '';
+    Object.keys(routeGroups).forEach((driver, idx) => {
+        const routes = routeGroups[driver];
+        const color = ['#1e5ba8', '#e31e24', '#28a745', '#ffc107', '#17a2b8'][idx % 5];
+        
+        groupsHTML += `
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid ${color};">
+                <h3 style="margin: 0 0 15px 0; color: ${color};">
+                    <i class="fas fa-user"></i> ${driver} (${routes.length} ruta)
+                </h3>
+                <div style="max-height: 200px; overflow-y: auto;">
+                    ${routes.map((r, i) => `
+                        <div style="padding: 8px; background: #f8f9fa; margin-bottom: 5px; border-radius: 5px; font-size: 0.9rem;">
+                            <strong>${i + 1}.</strong> ${r.name || r.email} - ${r.locationLabel || r.bookingType}: ${r.location || r.from}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;"><i class="fas fa-users"></i> Podjela Ruta za Vozače</h2>
+                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-times"></i> Zatvori
+                </button>
+            </div>
+            ${groupsHTML}
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0; text-align: center;">
+                <p style="color: #666; margin-bottom: 15px;">Kopirajte i pošaljite svakom vozaču njihovu rutu</p>
+                <button onclick="printRouteGroups()" class="btn-primary" style="padding: 10px 20px;">
+                    <i class="fas fa-print"></i> Ispiši Sve Rute
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+window.printRouteGroups = function() {
+    let printContent = '<h1>Podjela Ruta za Vozače</h1>';
+    
+    Object.keys(routeGroups).forEach(driver => {
+        const routes = routeGroups[driver];
+        printContent += `<h2>${driver} (${routes.length} ruta)</h2><ol>`;
+        routes.forEach(r => {
+            printContent += `<li>${r.name || r.email} - ${r.locationLabel || r.bookingType}: ${r.location || r.from}</li>`;
+        });
+        printContent += '</ol><hr>';
+    });
+    
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Podjela Ruta</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { color: #1e5ba8; }
+                    h2 { color: #333; margin-top: 30px; }
+                    ol { line-height: 1.8; }
+                    hr { margin: 30px 0; border: 1px solid #ddd; }
+                </style>
+            </head>
+            <body>${printContent}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
 }
 
 document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => {

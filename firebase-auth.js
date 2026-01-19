@@ -258,22 +258,76 @@ export async function createBooking(bookingData) {
             return { success: false, message: 'Morate biti prijavljeni' };
         }
         
-        const booking = {
-            ...bookingData,
-            userId: user.uid,
-            email: user.email,
-            name: user.displayName || user.email.split('@')[0],
-            phone: user.phoneNumber || '',
-            status: 'pending',
-            createdAt: serverTimestamp()
-        };
+        const isTransport = bookingData.serviceCategory === 'transport' && bookingData.from && bookingData.to;
         
-        const docRef = await addDoc(collection(db, 'bookings'), booking);
-        
-        return {
-            success: true,
-            bookingId: docRef.id
-        };
+        if (isTransport) {
+            // Split into 2 bookings for transport: origin and destination
+            const baseBooking = {
+                ...bookingData,
+                userId: user.uid,
+                name: user.displayName || user.email,
+                email: user.email,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                originalBookingId: null
+            };
+            
+            // First booking: Origin (Polazište)
+            const originBooking = {
+                ...baseBooking,
+                bookingType: 'origin',
+                location: bookingData.from,
+                locationLabel: 'Polazište',
+                to: '',
+                position: null
+            };
+            
+            const originDocRef = await addDoc(collection(db, 'bookings'), originBooking);
+            
+            // Second booking: Destination (Odredište)
+            const destinationBooking = {
+                ...baseBooking,
+                bookingType: 'destination',
+                location: bookingData.to,
+                locationLabel: 'Odredište',
+                from: bookingData.to,
+                to: '',
+                originalBookingId: originDocRef.id,
+                position: null
+            };
+            
+            const destDocRef = await addDoc(collection(db, 'bookings'), destinationBooking);
+            
+            // Update origin booking with link to destination
+            await updateDoc(doc(db, 'bookings', originDocRef.id), {
+                originalBookingId: destDocRef.id
+            });
+            
+            return {
+                success: true,
+                bookingId: originDocRef.id,
+                bookingIds: [originDocRef.id, destDocRef.id],
+                message: 'Kreirane 2 rezervacije: Polazište i Odredište'
+            };
+        } else {
+            // Regular booking for non-transport services
+            const booking = {
+                ...bookingData,
+                userId: user.uid,
+                name: user.displayName || user.email,
+                email: user.email,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                position: null
+            };
+            
+            const docRef = await addDoc(collection(db, 'bookings'), booking);
+            
+            return {
+                success: true,
+                bookingId: docRef.id
+            };
+        }
     } catch (error) {
         console.error('Create booking error:', error);
         return { success: false, message: 'Greška pri kreiranju rezervacije' };
