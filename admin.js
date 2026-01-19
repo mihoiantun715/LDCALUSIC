@@ -1081,7 +1081,7 @@ async function updateStatus() {
     }
 }
 
-function confirmDeleteBooking(bookingId) {
+window.confirmDeleteBooking = function(bookingId) {
     notify.confirmDelete(
         'Jeste li sigurni da želite obrisati ovu rezervaciju?',
         'Potvrda brisanja',
