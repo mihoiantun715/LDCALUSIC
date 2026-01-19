@@ -520,8 +520,35 @@ async function loadRoutesMap() {
         
         directionsRenderers.push(directionsRenderer);
         
-        const origin = booking.bookingType === 'destination' ? booking.from : booking.from;
-        const destination = booking.bookingType === 'destination' ? booking.from : (booking.to || booking.from);
+        let origin, destination;
+        
+        if (booking.bookingType === 'destination') {
+            // For destination, find the corresponding origin
+            const originBooking = allRouteBookings.find(b => 
+                b.originalBookingId === booking.id && b.bookingType === 'origin'
+            );
+            if (originBooking) {
+                origin = originBooking.from;
+                destination = booking.from;
+            } else {
+                // Fallback: show from current location to destination
+                origin = booking.from;
+                destination = booking.from;
+            }
+        } else {
+            // For origin bookings, show from origin to its destination
+            const destinationBooking = allRouteBookings.find(b => 
+                b.id === booking.originalBookingId && b.bookingType === 'destination'
+            );
+            if (destinationBooking) {
+                origin = booking.from;
+                destination = destinationBooking.from;
+            } else {
+                // Fallback: show from origin to itself
+                origin = booking.from;
+                destination = booking.from;
+            }
+        }
         
         directionsService.route({
             origin: origin,
@@ -871,7 +898,7 @@ document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => 
 });
 
 window.viewBooking = function(bookingId) {
-    const booking = allBookings.find(b => b.id === bookingId);
+    const booking = allRouteBookings.find(b => b.id === bookingId);
     if (!booking) return;
 
     currentBookingId = bookingId;
@@ -885,11 +912,19 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Korisnik:</div>
-            <div class="detail-value">${getUserName(booking.userId)}</div>
+            <div class="detail-value">${booking.name || booking.email || getUserName(booking.userId)}</div>
         </div>
         <div class="detail-row">
-            <div class="detail-label">Kategorija:</div>
-            <div class="detail-value">${getServiceName(booking.serviceCategory)}</div>
+            <div class="detail-label">Email:</div>
+            <div class="detail-value">${booking.email || '-'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Telefon:</div>
+            <div class="detail-value">${booking.phone || '-'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Tip Rezervacije:</div>
+            <div class="detail-value">${booking.locationLabel || booking.bookingType || 'Standard'}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Usluga:</div>
@@ -897,15 +932,15 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Datum & Vrijeme:</div>
-            <div class="detail-value">${booking.date} ${booking.time}</div>
+            <div class="detail-value">${booking.date} ${booking.time || ''}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Lokacija:</div>
-            <div class="detail-value">${booking.from}${booking.to ? ' → ' + booking.to : ''}</div>
+            <div class="detail-value">${booking.location || booking.from}${booking.to ? ' → ' + booking.to : ''}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Opis Usluge:</div>
-            <div class="detail-value">${booking.serviceDescription || '-'}</div>
+            <div class="detail-value">${booking.serviceDescription || booking.message || '-'}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Približna Težina:</div>
