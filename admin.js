@@ -383,7 +383,13 @@ async function loadRoutesMap() {
         return;
     }
     
-    const bookings = result.bookings.filter(b => b.from && b.to && b.serviceCategory === 'transport');
+    // Filter out cancelled bookings and only show transport with from/to
+    const bookings = result.bookings.filter(b => 
+        b.from && 
+        b.to && 
+        b.serviceCategory === 'transport' && 
+        b.status !== 'cancelled'
+    );
     
     if (bookings.length === 0) {
         document.getElementById('routesList').innerHTML = '<p class="no-data">Nema dostupnih ruta za prikaz</p>';
@@ -407,20 +413,24 @@ async function loadRoutesMap() {
     directionsRenderers = [];
     
     // Display routes
-    const colors = ['#1e5ba8', '#e31e24', '#43e97b', '#f093fb', '#4facfe'];
     const routesList = document.getElementById('routesList');
     routesList.innerHTML = '';
     
     bookings.forEach((booking, index) => {
-        const color = colors[index % colors.length];
+        const color = '#1e5ba8'; // Blue color for all routes
+        
+        // Get Croatian service name
+        const serviceName = getServiceNameCroatian(booking.service);
         
         // Create route card
         const routeCard = document.createElement('div');
         routeCard.className = 'route-card';
         routeCard.style.borderLeft = `4px solid ${color}`;
+        routeCard.style.cursor = 'pointer';
+        routeCard.onclick = () => viewBooking(booking.id);
         routeCard.innerHTML = `
             <div class="route-header">
-                <h4>${booking.service || 'Transport'}</h4>
+                <h4>${serviceName}</h4>
                 <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
             </div>
             <div class="route-details">
@@ -432,15 +442,17 @@ async function loadRoutesMap() {
         `;
         routesList.appendChild(routeCard);
         
-        // Draw route on map
+        // Draw route on map with clickable polyline
         const directionsRenderer = new google.maps.DirectionsRenderer({
             map: map,
             suppressMarkers: false,
             polylineOptions: {
                 strokeColor: color,
-                strokeWeight: 4,
-                strokeOpacity: 0.7
-            }
+                strokeWeight: 5,
+                strokeOpacity: 0.8,
+                clickable: true
+            },
+            preserveViewport: index > 0
         });
         
         directionsRenderers.push(directionsRenderer);
@@ -452,11 +464,52 @@ async function loadRoutesMap() {
         }, (response, status) => {
             if (status === 'OK') {
                 directionsRenderer.setDirections(response);
+                
+                // Add click listener to polyline
+                google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
+                    const directions = directionsRenderer.getDirections();
+                    if (directions) {
+                        const polyline = directionsRenderer.getDirections().routes[0].overview_path;
+                        
+                        // Create invisible clickable overlay
+                        const routePath = new google.maps.Polyline({
+                            path: polyline,
+                            strokeColor: color,
+                            strokeWeight: 10,
+                            strokeOpacity: 0,
+                            map: map,
+                            clickable: true
+                        });
+                        
+                        routePath.addListener('click', () => {
+                            viewBooking(booking.id);
+                        });
+                    }
+                });
             } else {
                 console.error('Directions request failed:', status);
             }
         });
     });
+}
+
+// Get Croatian service name
+function getServiceNameCroatian(service) {
+    const serviceNames = {
+        vehicle_transport: 'Prijevoz motornih vozila',
+        furniture_appliances: 'Namještaj i kućanski aparati',
+        general_cargo: 'Paletirana i rasuti teret',
+        cargo: 'Paletirana i rasuti teret',
+        installation: 'Instalacija i deinstalacija aparata',
+        furniture_assembly: 'Dostava i ugradnja namještaja',
+        fitness_equipment: 'Fitness aparati',
+        general_transport: 'Transport robe po RH',
+        moving: 'Selidbe po EU',
+        space_clearing: 'Pražnjenje prostora',
+        waste_disposal: 'Odvoz otpada',
+        transport: 'Prijevoz i dostava'
+    };
+    return serviceNames[service] || service || 'Transport';
 }
 
 document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => {
@@ -488,7 +541,7 @@ function viewBooking(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Usluga:</div>
-            <div class="detail-value">${booking.service}</div>
+            <div class="detail-value">${getServiceNameCroatian(booking.service)}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Datum & Vrijeme:</div>
