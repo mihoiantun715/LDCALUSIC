@@ -341,7 +341,18 @@
             <div id="bookingDetails" class="booking-details-full">
                 <!-- Details will be populated by JavaScript -->
             </div>
-            <div class="modal-actions">
+            <div class="modal-actions" id="modalActions">
+                <button class="btn-success" onclick="acceptBooking()" id="acceptBtn" style="background: #28a745; padding: 12px 30px; font-size: 1rem;">
+                    <i class="fas fa-check-circle"></i> Prihvati Rezervaciju
+                </button>
+                <button class="btn-danger" onclick="denyBooking()" id="denyBtn" style="padding: 12px 30px; font-size: 1rem;">
+                    <i class="fas fa-times-circle"></i> Odbij Rezervaciju
+                </button>
+                <button class="btn-secondary" onclick="deleteBookingConfirm()" style="margin-left: auto;">
+                    <i class="fas fa-trash"></i> Obriši
+                </button>
+            </div>
+            <div class="modal-actions" id="modalActionsAlternate" style="display: none;">
                 <select id="modalStatusSelect" class="status-select">
                     <option value="pending">Na Čekanju</option>
                     <option value="confirmed">Potvrđeno</option>

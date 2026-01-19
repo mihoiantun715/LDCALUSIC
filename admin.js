@@ -573,9 +573,77 @@ function viewBooking(bookingId) {
         </div>
     `;
 
-    document.getElementById('modalStatusSelect').value = booking.status;
+    // Show Accept/Deny buttons only for pending bookings
+    const modalActions = document.getElementById('modalActions');
+    const modalActionsAlternate = document.getElementById('modalActionsAlternate');
+    const acceptBtn = document.getElementById('acceptBtn');
+    const denyBtn = document.getElementById('denyBtn');
+    
+    if (booking.status === 'pending') {
+        modalActions.style.display = 'flex';
+        modalActionsAlternate.style.display = 'none';
+    } else {
+        modalActions.style.display = 'none';
+        modalActionsAlternate.style.display = 'flex';
+        document.getElementById('modalStatusSelect').value = booking.status;
+    }
+    
     modal.style.display = 'block';
 }
+
+// Accept booking
+async function acceptBooking() {
+    if (!currentBookingId) return;
+    
+    if (!confirm('Jeste li sigurni da želite prihvatiti ovu rezervaciju? Korisniku će biti poslan email.')) {
+        return;
+    }
+    
+    try {
+        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        
+        await updateDoc(doc(db, 'bookings', currentBookingId), {
+            status: 'confirmed'
+        });
+        
+        notify.success('Rezervacija prihvaćena! Email poslan korisniku.');
+        document.getElementById('bookingModal').style.display = 'none';
+        loadBookings();
+        loadRoutesMap();
+    } catch (error) {
+        console.error('Error accepting booking:', error);
+        notify.error('Greška pri prihvaćanju rezervacije');
+    }
+}
+
+// Deny booking
+async function denyBooking() {
+    if (!currentBookingId) return;
+    
+    const reason = prompt('Unesite razlog odbijanja (bit će poslan korisniku):');
+    if (!reason) return;
+    
+    try {
+        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        
+        await updateDoc(doc(db, 'bookings', currentBookingId), {
+            status: 'cancelled',
+            cancellationReason: reason,
+            cancelledBy: 'admin'
+        });
+        
+        notify.success('Rezervacija odbijena! Email poslan korisniku.');
+        document.getElementById('bookingModal').style.display = 'none';
+        loadBookings();
+        loadRoutesMap();
+    } catch (error) {
+        console.error('Error denying booking:', error);
+        notify.error('Greška pri odbijanju rezervacije');
+    }
+}
+
+window.acceptBooking = acceptBooking;
+window.denyBooking = denyBooking;
 
 async function updateStatus() {
     if (!currentBookingId) return;
