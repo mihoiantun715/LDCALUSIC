@@ -22,6 +22,46 @@ import {
     signInWithPopup
 } from './firebase-config.js';
 
+// Google Sign-In
+export async function signInWithGoogle() {
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Check if user document exists, if not create it
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userDoc.exists()) {
+            await setDoc(doc(db, 'users', user.uid), {
+                name: user.displayName || 'Google User',
+                email: user.email,
+                phone: user.phoneNumber || '',
+                createdAt: serverTimestamp(),
+                role: 'user',
+                provider: 'google'
+            });
+        }
+        
+        return {
+            success: true,
+            user: {
+                uid: user.uid,
+                name: user.displayName,
+                email: user.email
+            }
+        };
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        return { 
+            success: false, 
+            message: error.code === 'auth/popup-closed-by-user' 
+                ? 'Prijava otkazana' 
+                : 'Greška pri Google prijavi' 
+        };
+    }
+}
+
 // Register new user
 export async function registerUser(name, email, phone, password) {
     try {

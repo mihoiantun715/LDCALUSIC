@@ -397,7 +397,8 @@ async function loadRoutesMap() {
             zoom: 7,
             center: { lat: 45.8150, lng: 15.9819 }, // Croatia center
             mapTypeControl: true,
-            streetViewControl: false
+            streetViewControl: false,
+            mapId: '6d85f719dc2c8d13578b742f'
         });
     }
     
