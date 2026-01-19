@@ -130,14 +130,18 @@
 
     <script src="notification.js"></script>
     <script type="module">
-        import { auth, db } from './firebase-config.js';
-        import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { doc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { auth, db, createUserWithEmailAndPassword, doc, setDoc, collection, getDocs } from './firebase-config.js';
 
         // Check if admin already exists
         async function checkAdminExists() {
-            const adminsSnapshot = await getDocs(collection(db, 'admins'));
-            return !adminsSnapshot.empty;
+            try {
+                const adminsRef = collection(db, 'admins');
+                const adminsSnapshot = await getDocs(adminsRef);
+                return !adminsSnapshot.empty;
+            } catch (error) {
+                console.error('Error checking admin:', error);
+                return false;
+            }
         }
 
         // Initialize
