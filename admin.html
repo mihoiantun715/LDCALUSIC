@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LD ČALUŠIĆ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="notification.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="logo.png" alt="LD ČALUŠIĆ Logo" class="logo-img">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Početna</a></li>
+                <li><a href="#admin" class="nav-link active">Admin Panel</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="user-info">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="adminName">Administrator</span>
+                    <button class="logout-btn" id="adminLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Odjava
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-item active" data-section="overview">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Pregled</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="bookings">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Rezervacije</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="users">
+                    <i class="fas fa-users"></i>
+                    <span>Korisnici</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="services">
+                    <i class="fas fa-cogs"></i>
+                    <span>Usluge</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="reports">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Izvještaji</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="settings">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Postavke</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="dashboard-content">
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <h1>Pregled Sustava</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalBookings">0</h3>
+                            <p>Ukupno Rezervacija</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendingBookings">0</h3>
+                            <p>Na Čekanju</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="confirmedBookings">0</h3>
+                            <p>Potvrđeno</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Registrirani Korisnici</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Nedavne Aktivnosti</h2>
+                    <div id="recentActivity" class="activity-list">
+                        <p class="no-data">Učitavanje...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bookings Management Section -->
+            <section id="bookings" class="content-section">
+                <div class="section-header">
+                    <h1>Upravljanje Rezervacijama</h1>
+                    <div class="filter-controls">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="all">Svi Statusi</option>
+                            <option value="pending">Na Čekanju</option>
+                            <option value="confirmed">Potvrđeno</option>
+                            <option value="completed">Završeno</option>
+                            <option value="cancelled">Otkazano</option>
+                        </select>
+                        <select id="serviceFilter" class="filter-select">
+                            <option value="all">Sve Usluge</option>
+                            <option value="transport">Prijevoz i Dostava</option>
+                            <option value="cleaning">Čišćenje</option>
+                            <option value="garden">Održavanje Zelenih Površina</option>
+                            <option value="rental">Najam Opreme</option>
+                            <option value="special">Specijalne Usluge</option>
+                        </select>
+                        <input type="text" id="searchBooking" class="search-input" placeholder="Pretraži po imenu ili ID...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Korisnik</th>
+                                <th>Usluga</th>
+                                <th>Datum & Vrijeme</th>
+                                <th>Lokacija</th>
+                                <th>Opis</th>
+                                <th>Status</th>
+                                <th>Akcije</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <tr>
+                                <td colspan="8" class="no-data">Učitavanje rezervacija...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Management Section -->
+            <section id="users" class="content-section">
+                <div class="section-header">
+                    <h1>Upravljanje Korisnicima</h1>
+                    <input type="text" id="searchUser" class="search-input" placeholder="Pretraži korisnike...">
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ime</th>
+                                <th>Email</th>
+                                <th>Telefon</th>
+                                <th>Datum Registracije</th>
+                                <th>Broj Rezervacija</th>
+                                <th>Akcije</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="no-data">Učitavanje korisnika...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Services Section -->
+            <section id="services" class="content-section">
+                <h1>Statistika Usluga</h1>
+                <div class="services-stats">
+                    <div class="service-stat-card">
+                        <h3><i class="fas fa-truck-loading"></i> Prijevoz i Dostava</h3>
+                        <div class="stat-number" id="transportCount">0</div>
+                        <p>rezervacija</p>
+                    </div>
+                    <div class="service-stat-card">
+                        <h3><i class="fas fa-spray-can"></i> Čišćenje</h3>
+                        <div class="stat-number" id="cleaningCount">0</div>
+                        <p>rezervacija</p>
+                    </div>
+                    <div class="service-stat-card">
+                        <h3><i class="fas fa-seedling"></i> Održavanje Zelenih Površina</h3>
+                        <div class="stat-number" id="gardenCount">0</div>
+                        <p>rezervacija</p>
+                    </div>
+                    <div class="service-stat-card">
+                        <h3><i class="fas fa-handshake"></i> Najam Opreme</h3>
+                        <div class="stat-number" id="rentalCount">0</div>
+                        <p>rezervacija</p>
+                    </div>
+                    <div class="service-stat-card">
+                        <h3><i class="fas fa-star"></i> Specijalne Usluge</h3>
+                        <div class="stat-number" id="specialCount">0</div>
+                        <p>rezervacija</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="content-section">
+                <h1>Izvještaji</h1>
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Mjesečni Izvještaj</h3>
+                        <p>Pregled rezervacija i prihoda za tekući mjesec</p>
+                        <button class="btn-primary" onclick="generateMonthlyReport()">
+                            <i class="fas fa-download"></i> Preuzmi Izvještaj
+                        </button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Godišnji Izvještaj</h3>
+                        <p>Kompletna statistika za cijelu godinu</p>
+                        <button class="btn-primary" onclick="generateYearlyReport()">
+                            <i class="fas fa-download"></i> Preuzmi Izvještaj
+                        </button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Izvještaj Korisnika</h3>
+                        <p>Lista svih registriranih korisnika</p>
+                        <button class="btn-primary" onclick="generateUsersReport()">
+                            <i class="fas fa-download"></i> Preuzmi Izvještaj
+                        </button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Prilagođeni Izvještaj</h3>
+                        <div class="date-range">
+                            <input type="date" id="reportStartDate" class="date-input">
+                            <span>do</span>
+                            <input type="date" id="reportEndDate" class="date-input">
+                        </div>
+                        <button class="btn-primary" onclick="generateCustomReport()">
+                            <i class="fas fa-download"></i> Preuzmi Izvještaj
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <h1>Postavke Sustava</h1>
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h3>Obavijesti</h3>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Email obavijesti za nove rezervacije</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="smsNotifications">
+                                <span class="slider"></span>
+                            </label>
+                            <span>SMS obavijesti</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Radno Vrijeme</h3>
+                        <div class="working-hours">
+                            <div class="hour-input">
+                                <label>Početak:</label>
+                                <input type="time" id="workStart" value="08:00">
+                            </div>
+                            <div class="hour-input">
+                                <label>Kraj:</label>
+                                <input type="time" id="workEnd" value="20:00">
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="saveWorkingHours()">Spremi Promjene</button>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Sigurnost</h3>
+                        <button class="btn-secondary" onclick="changeAdminPassword()">
+                            <i class="fas fa-key"></i> Promijeni Lozinku
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <h2>Detalji Rezervacije</h2>
+            <div id="bookingDetails" class="booking-details-full">
+                <!-- Details will be populated by JavaScript -->
+            </div>
+            <div class="modal-actions">
+                <select id="modalStatusSelect" class="status-select">
+                    <option value="pending">Na Čekanju</option>
+                    <option value="confirmed">Potvrđeno</option>
+                    <option value="completed">Završeno</option>
+                    <option value="cancelled">Otkazano</option>
+                </select>
+                <button class="btn-primary" onclick="updateStatus()">Ažuriraj Status</button>
+                <button class="btn-danger" onclick="deleteBookingConfirm()">Obriši Rezervaciju</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="notification.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

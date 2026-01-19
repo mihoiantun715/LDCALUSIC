@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LD ČALUŠIĆ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="dashboard-mobile.css">
+    <link rel="stylesheet" href="notification.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="logo.png" alt="LD ČALUŠIĆ Logo" class="logo-img">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Početna</a></li>
+                <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="hr">HR</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">Korisnik</span>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Odjava
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <nav class="sidebar-menu">
+                <a href="#" class="sidebar-item active" data-section="new-booking">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="sidebar-text" data-translate="dash_new_booking">Nova Rezervacija</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="my-bookings">
+                    <i class="fas fa-list"></i>
+                    <span class="sidebar-text" data-translate="dash_my_bookings">Moje Rezervacije</span>
+                </a>
+                <a href="#" class="sidebar-item" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span class="sidebar-text" data-translate="dash_profile">Profil</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="dashboard-content">
+            <section id="new-booking" class="content-section active">
+                <h1 data-translate="dash_new_booking">Nova Rezervacija</h1>
+                <p class="section-desc" data-translate="dash_select_service">Odaberite vrstu usluge i ispunite podatke</p>
+
+                <div class="service-selector">
+                    <button class="service-tab active" data-service="transport">
+                        <i class="fas fa-truck"></i>
+                        <span data-translate="tab_transport">Prijevoz i Dostava sa Instalacijom</span>
+                    </button>
+                    <button class="service-tab" data-service="cleaning">
+                        <i class="fas fa-broom"></i>
+                        <span data-translate="tab_cleaning">Čišćenje</span>
+                    </button>
+                    <button class="service-tab" data-service="garden">
+                        <i class="fas fa-leaf"></i>
+                        <span data-translate="tab_garden">Održavanje Zelenih Površina</span>
+                    </button>
+                    <button class="service-tab" data-service="rental">
+                        <i class="fas fa-handshake"></i>
+                        <span data-translate="tab_rental">Najam Opreme</span>
+                    </button>
+                    <button class="service-tab" data-service="special">
+                        <i class="fas fa-star"></i>
+                        <span data-translate="tab_special">Specijalne Usluge</span>
+                    </button>
+                </div>
+
+                <form class="booking-form-detailed" id="bookingFormDetailed">
+                    <div class="service-options" id="transportOptions">
+                        <h3 data-translate="transport_title">Prijevoz i Dostava sa Instalacijom - Odaberite Uslugu</h3>
+                        <div class="options-grid">
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="vehicle_transport" required>
+                                <div class="option-content">
+                                    <i class="fas fa-car"></i>
+                                    <h4 data-translate="trans_vehicles">Prijevoz motornih vozila</h4>
+                                    <p data-translate="trans_vehicles_desc">Transport automobila, motocikala i drugih vozila</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="furniture_appliances">
+                                <div class="option-content">
+                                    <i class="fas fa-couch"></i>
+                                    <h4 data-translate="trans_furniture">Namještaj i kućanski aparati</h4>
+                                    <p data-translate="trans_furniture_desc">Dostava namještaja i kućanskih aparata</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="cargo">
+                                <div class="option-content">
+                                    <i class="fas fa-boxes"></i>
+                                    <h4 data-translate="trans_cargo">Paletirana i rasuti teret</h4>
+                                    <p data-translate="trans_cargo_desc">Transport paletiranog i rasutog tereta</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="installation">
+                                <div class="option-content">
+                                    <i class="fas fa-tools"></i>
+                                    <h4 data-translate="trans_install">Instalacija i deinstalacija aparata</h4>
+                                    <p data-translate="trans_install_desc">Ugradnja i odvoz starih kućanskih aparata</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="furniture_assembly">
+                                <div class="option-content">
+                                    <i class="fas fa-hammer"></i>
+                                    <h4 data-translate="trans_assembly">Dostava i ugradnja namještaja</h4>
+                                    <p data-translate="trans_assembly_desc">Sastavljanje manjih kuhinja i namještaja</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="fitness">
+                                <div class="option-content">
+                                    <i class="fas fa-dumbbell"></i>
+                                    <h4 data-translate="trans_fitness">Fitness aparati</h4>
+                                    <p data-translate="trans_fitness_desc">Dostava i sastavljanje fitness opreme</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="general_cargo">
+                                <div class="option-content">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    <h4 data-translate="trans_general">Transport robe po RH</h4>
+                                    <p data-translate="trans_general_desc">Sve vrste neopasnog tereta diljem Hrvatske</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="moving_eu">
+                                <div class="option-content">
+                                    <i class="fas fa-globe-europe"></i>
+                                    <h4 data-translate="trans_moving">Selidbe po EU</h4>
+                                    <p data-translate="trans_moving_desc">Međunarodne selidbe po cijeloj Europi</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="clearing">
+                                <div class="option-content">
+                                    <i class="fas fa-home"></i>
+                                    <h4 data-translate="trans_clearing">Pražnjenje prostora</h4>
+                                    <p data-translate="trans_clearing_desc">Pražnjenje poslovnih i stambenih prostora</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="transportService" value="waste">
+                                <div class="option-content">
+                                    <i class="fas fa-recycle"></i>
+                                    <h4 data-translate="trans_waste">Odvoz otpada</h4>
+                                    <p data-translate="trans_waste_desc">Odvoz starih aparata i neopasnog otpada</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="service-options" id="cleaningOptions" style="display: none;">
+                        <h3 data-translate="cleaning_title">Usluge Čišćenja - Odaberite Uslugu</h3>
+                        <div class="options-grid">
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="general_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-broom"></i>
+                                    <h4 data-translate="clean_general">Opće čišćenje prostora</h4>
+                                    <p data-translate="clean_general_desc">Osnovno čišćenje prostorija</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="regular_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <h4 data-translate="clean_regular">Redovito čišćenje</h4>
+                                    <p data-translate="clean_regular_desc">Redovito čišćenje uredskih i stambenih prostora</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="deep_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-spray-can"></i>
+                                    <h4 data-translate="clean_deep">Dubinsko čišćenje</h4>
+                                    <p data-translate="clean_deep_desc">Generalno čišćenje nakon renovacije ili selidbe</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="floor_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-shoe-prints"></i>
+                                    <h4 data-translate="clean_floors">Čišćenje podova</h4>
+                                    <p data-translate="clean_floors_desc">Usisavanje, pranje i poliranje podova</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="disinfection">
+                                <div class="option-content">
+                                    <i class="fas fa-virus-slash"></i>
+                                    <h4 data-translate="clean_disinfect">Dezinfekcija</h4>
+                                    <p data-translate="clean_disinfect_desc">Dezinfekcija sanitarnih čvorova i kuhinja</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="window_washing">
+                                <div class="option-content">
+                                    <i class="fas fa-window-maximize"></i>
+                                    <h4 data-translate="clean_windows">Pranje prozora</h4>
+                                    <p data-translate="clean_windows_desc">Pranje unutarnjih i vanjskih stakala</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="glass_surfaces">
+                                <div class="option-content">
+                                    <i class="fas fa-door-open"></i>
+                                    <h4 data-translate="clean_glass">Čišćenje staklenih površina</h4>
+                                    <p data-translate="clean_glass_desc">Izlozi, staklena vrata i fasade</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="balcony_glass">
+                                <div class="option-content">
+                                    <i class="fas fa-building"></i>
+                                    <h4 data-translate="clean_balcony">Balkonske ograde</h4>
+                                    <p data-translate="clean_balcony_desc">Pranje staklenih fasada i balkonskih ograda</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="stain_removal">
+                                <div class="option-content">
+                                    <i class="fas fa-eraser"></i>
+                                    <h4 data-translate="clean_stains">Uklanjanje tvrdokornih mrlja</h4>
+                                    <p data-translate="clean_stains_desc">Vapno, cement, ljepilo sa stakla</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="cleaningService" value="frames_shutters">
+                                <div class="option-content">
+                                    <i class="fas fa-border-style"></i>
+                                    <h4 data-translate="clean_frames">Okviri i rolete</h4>
+                                    <p data-translate="clean_frames_desc">Čišćenje okvira, roleta i prozorskih klupica</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="service-options" id="gardenOptions" style="display: none;">
+                        <h3 data-translate="garden_title">Održavanje Zelenih Površina</h3>
+                        <div class="options-grid">
+                            <label class="option-card">
+                                <input type="radio" name="gardenService" value="lawn_mowing">
+                                <div class="option-content">
+                                    <i class="fas fa-leaf"></i>
+                                    <h4 data-translate="garden_mowing">Košnja travnjaka</h4>
+                                    <p data-translate="garden_mowing_desc">Redovno održavanje travnjaka</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="gardenService" value="tree_trimming">
+                                <div class="option-content">
+                                    <i class="fas fa-tree"></i>
+                                    <h4 data-translate="garden_trees">Rezidba stabala</h4>
+                                    <p data-translate="garden_trees_desc">Rezidba i sanacija stabala</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="gardenService" value="hedge_trimming">
+                                <div class="option-content">
+                                    <i class="fas fa-cut"></i>
+                                    <h4 data-translate="garden_hedges">Formiranje živica</h4>
+                                    <p data-translate="garden_hedges_desc">Rezidba i formiranje živica i grmova</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="gardenService" value="planting">
+                                <div class="option-content">
+                                    <i class="fas fa-seedling"></i>
+                                    <h4 data-translate="garden_planting">Sadnja bilja</h4>
+                                    <p data-translate="garden_planting_desc">Sadnja cvijeća i ukrasnog bilja</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="service-options" id="rentalOptions" style="display: none;">
+                        <h3 data-translate="rental_title">Najam Opreme</h3>
+                        <div class="options-grid">
+                            <label class="option-card">
+                                <input type="radio" name="rentalService" value="fridge">
+                                <div class="option-content">
+                                    <i class="fas fa-snowflake"></i>
+                                    <h4 data-translate="rental_fridge">Frižider za zabave</h4>
+                                    <p data-translate="rental_fridge_desc">Najam frižidera za događaje</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="rentalService" value="tractor">
+                                <div class="option-content">
+                                    <i class="fas fa-tractor"></i>
+                                    <h4 data-translate="rental_tractor">Traktor kosilica</h4>
+                                    <p data-translate="rental_tractor_desc">Najam traktora kosilice</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="rentalService" value="van">
+                                <div class="option-content">
+                                    <i class="fas fa-truck"></i>
+                                    <h4 data-translate="rental_van">Kombi 3,5t</h4>
+                                    <p data-translate="rental_van_desc">Najam kombi vozila</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="service-options" id="specialOptions" style="display: none;">
+                        <h3 data-translate="special_title">Specijalne Usluge</h3>
+                        <div class="options-grid">
+                            <label class="option-card">
+                                <input type="radio" name="specialService" value="commercial_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-industry"></i>
+                                    <h4 data-translate="special_commercial">Čišćenje poslovnih objekata</h4>
+                                    <p data-translate="special_commercial_desc">Čišćenje poslovnih objekata i industrijskih hala</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="specialService" value="construction_cleanup">
+                                <div class="option-content">
+                                    <i class="fas fa-hard-hat"></i>
+                                    <h4 data-translate="special_construction">Čišćenje nakon građevinskih radova</h4>
+                                    <p data-translate="special_construction_desc">Profesionalno čišćenje nakon renovacije i gradnje</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="specialService" value="common_areas">
+                                <div class="option-content">
+                                    <i class="fas fa-building"></i>
+                                    <h4 data-translate="special_common">Zajednički prostori u zgradama</h4>
+                                    <p data-translate="special_common_desc">Čišćenje i dezinfekcija zajedničkih prostora</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="specialService" value="outdoor_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-road"></i>
+                                    <h4 data-translate="special_outdoor">Čišćenje vanjskih površina</h4>
+                                    <p data-translate="special_outdoor_desc">Dvorišta, prilazi i vanjski prostori</p>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="specialService" value="event_cleaning">
+                                <div class="option-content">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h4 data-translate="special_events">Održavanje čistoće na događanjima</h4>
+                                    <p data-translate="special_events_desc">Čišćenje prije, tijekom i nakon događaja</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-details">
+                        <h3 data-translate="booking_details">Detalji Rezervacije</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookingDate" data-translate="form_date">Datum</label>
+                                <input type="date" id="bookingDate" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingTime" data-translate="form_time">Vrijeme</label>
+                                <input type="time" id="bookingTime" name="time" required>
+                            </div>
+                        </div>
+                        <div class="form-row" id="transportLocationRow">
+                            <div class="form-group">
+                                <label for="locationFrom" data-translate="form_from">Polazište</label>
+                                <input type="text" id="locationFrom" name="from">
+                            </div>
+                            <div class="form-group">
+                                <label for="locationTo" data-translate="form_to">Odredište</label>
+                                <input type="text" id="locationTo" name="to">
+                            </div>
+                        </div>
+                        <div class="form-row" id="fixedLocationRow" style="display: none;">
+                            <div class="form-group">
+                                <label for="fixedLocation" data-translate="form_fixed_location">Lokacija</label>
+                                <input type="text" id="fixedLocation" name="fixedLocation" placeholder="Unesite adresu...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="serviceDescription" data-translate="form_exact_service">Točan opis usluge</label>
+                                <input type="text" id="serviceDescription" name="serviceDescription" placeholder="Npr. prijevoz hladnjaka, čišćenje 3 sobe..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="approxWeight" data-translate="form_weight">Približna težina (kg)</label>
+                                <input type="number" id="approxWeight" name="approxWeight" placeholder="Npr. 50" min="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookingNotes" data-translate="form_message">Dodatne informacije</label>
+                            <textarea id="bookingNotes" name="notes" rows="4" placeholder="Opišite dodatne detalje..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn" data-translate="form_submit">Pošalji zahtjev</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="my-bookings" class="content-section">
+                <h1 data-translate="dash_my_bookings">Moje Rezervacije</h1>
+                <div id="bookingsList" class="bookings-list">
+                    <p class="no-bookings" data-translate="no_bookings">Nemate aktivnih rezervacija.</p>
+                </div>
+            </section>
+
+            <section id="profile" class="content-section">
+                <h1 data-translate="dash_profile">Moj Profil</h1>
+                <div class="profile-info">
+                    <div class="profile-field">
+                        <label data-translate="form_name">Ime i prezime</label>
+                        <p id="profileName">-</p>
+                    </div>
+                    <div class="profile-field">
+                        <label data-translate="form_email">Email</label>
+                        <p id="profileEmail">-</p>
+                        <button class="btn-secondary" id="changeEmailBtn">Promijeni Email</button>
+                    </div>
+                    <div class="profile-field">
+                        <label data-translate="form_phone">Telefon</label>
+                        <p id="profilePhone">-</p>
+                    </div>
+                    <div class="profile-field">
+                        <label>Lozinka</label>
+                        <p>••••••••</p>
+                        <button class="btn-secondary" id="changePasswordBtn">Promijeni Lozinku</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="notification.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="dashboard.js"></script>
+</body>
+</html>

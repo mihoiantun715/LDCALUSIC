@@ -1,0 +1,278 @@
+/* Mobile-specific styles for Home Page */
+/* Applied only on screens smaller than 768px */
+
+@media (max-width: 768px) {
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+
+    /* Navigation */
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 70px;
+        flex-direction: column;
+        background: var(--white);
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0,0,0,0.05);
+        padding: 20px 0;
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    /* Hero Section */
+    .hero {
+        padding: 120px 0 60px;
+        min-height: auto;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        line-height: 1.3;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+
+    .hero-features {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hero-feature {
+        font-size: 0.85rem;
+        padding: 8px 15px;
+    }
+
+    .cta-button {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+
+    /* Services Section */
+    .services {
+        padding: 60px 0;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .service-card {
+        padding: 25px 20px;
+    }
+
+    /* About Section */
+    .about {
+        padding: 60px 0;
+    }
+
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .about-features {
+        grid-template-columns: 1fr;
+    }
+
+    /* Booking Section */
+    .booking {
+        padding: 60px 0;
+        overflow-x: hidden;
+    }
+
+    .booking .container {
+        padding: 0 15px;
+        max-width: 100%;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        padding: 0 10px;
+        word-wrap: break-word;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+        padding: 0 10px;
+    }
+
+    .booking-form {
+        padding: 25px 15px;
+        margin: 0 auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Contact Section */
+    .contact {
+        padding: 60px 0;
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 40px 0 20px;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    /* Modals */
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        margin: 20px auto;
+        padding: 30px 20px;
+        max-width: 95%;
+        max-height: calc(100vh - 40px);
+    }
+
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .password-requirements {
+        padding: 12px 10px;
+    }
+
+    .requirement-item {
+        font-size: 0.85rem;
+    }
+
+    .google-btn {
+        font-size: 0.95rem;
+        padding: 12px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+    body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    * {
+        max-width: 100%;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+        padding: 0 15px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        padding: 0 10px;
+    }
+
+    .logo-img {
+        height: 40px;
+    }
+
+    .nav-container {
+        padding: 10px 12px;
+        max-width: 100vw;
+    }
+
+    .container {
+        padding: 0 12px;
+        max-width: 100%;
+    }
+
+    .booking-form {
+        padding: 20px 12px;
+        margin: 0;
+        width: 100%;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .modal-content {
+        padding: 25px 15px;
+        margin: 15px auto;
+        max-width: calc(100vw - 30px);
+    }
+
+    .hero-features {
+        padding: 0 10px;
+    }
+
+    .feature-badge {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+}

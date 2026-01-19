@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1768840615343",
+    "name": "Mihovil Markovic",
+    "email": "markovicmihovil1437@gmail.com",
+    "phone": "01732947881",
+    "password": "$2a$10$XmJK.HzHsj/fK39OROG09.cMa9MznSyZz/Ea6GnDshlt0lEKn.dWK",
+    "createdAt": "2026-01-19T16:36:55.343Z"
+  },
+  {
+    "id": "1768843829798",
+    "name": "miasodias",
+    "email": "test@gmail.com",
+    "phone": "123456789",
+    "password": "$2a$10$s2rH.W/EEg8v.q6ToVMqJ.EUS0vb.JtLhQA2ohGMQfVBUSsirHvNG",
+    "createdAt": "2026-01-19T17:30:29.798Z"
+  },
+  {
+    "id": "1768844614203",
+    "name": "Test Korisnik",
+    "email": "test@ldcalusic.hr",
+    "phone": "091 234 5678",
+    "password": "$2a$10$kRHV9pjLXuqyf/V3QiOQVeiiVp9CFt1MdCoYG4MGzPtqa6JwFX2DO",
+    "createdAt": "2026-01-19T17:43:34.203Z"
+  }
+]

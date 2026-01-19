@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - LD ČALUŠIĆ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-login-container {
+            background: var(--white);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-login-header i {
+            font-size: 4rem;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .admin-login-header h1 {
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+        }
+
+        .admin-login-header p {
+            color: var(--text-light);
+        }
+
+        .admin-form-group {
+            margin-bottom: 25px;
+        }
+
+        .admin-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        .admin-form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .admin-form-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(30,91,168,0.1);
+        }
+
+        .admin-login-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .admin-login-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(30,91,168,0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .back-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-login-header">
+            <i class="fas fa-user-shield"></i>
+            <h1>Admin Prijava</h1>
+            <p>LD ČALUŠIĆ - Administratorski Panel</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="adminLoginForm">
+            <div class="admin-form-group">
+                <label for="adminEmail">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="adminEmail" required placeholder="Unesite email adresu">
+            </div>
+
+            <div class="admin-form-group">
+                <label for="adminPassword">
+                    <i class="fas fa-lock"></i> Lozinka
+                </label>
+                <input type="password" id="adminPassword" required placeholder="Unesite lozinku">
+            </div>
+
+            <button type="submit" class="admin-login-btn">
+                <i class="fas fa-sign-in-alt"></i> Prijavi se
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">
+                <i class="fas fa-arrow-left"></i> Povratak na početnu
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { loginAdmin } from './firebase-auth.js';
+        
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            const result = await loginAdmin(email, password);
+
+            if (result.success) {
+                // Firebase auth state persists automatically
+                window.location.href = 'admin.html';
+            } else {
+                errorMessage.textContent = result.message || 'Neispravan email ili lozinka';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

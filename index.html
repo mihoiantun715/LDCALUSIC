@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LD ČALUŠIĆ - Usluge i Prijevoz</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notification.css">
+    <link rel="stylesheet" href="index-mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="logo.png" alt="LD ČALUŠIĆ Logo" class="logo-img">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="javascript:void(0)" class="nav-link" data-section="home" data-translate="nav_home">Početna</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-section="services" data-translate="nav_services">Usluge</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-section="about" data-translate="nav_about">O nama</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-section="booking" data-translate="nav_booking">Rezervacija</a></li>
+                <li><a href="javascript:void(0)" class="nav-link" data-section="contact" data-translate="nav_contact">Kontakt</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="hr">HR</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <div class="auth-dropdown">
+                    <button class="auth-btn">
+                        <i class="fas fa-user"></i>
+                        <span data-translate="auth_account">Račun</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="javascript:void(0)" class="dropdown-item" id="loginBtn" data-translate="auth_login">Prijava</a>
+                        <a href="javascript:void(0)" class="dropdown-item" id="registerBtn" data-translate="auth_register">Registracija</a>
+                    </div>
+                </div>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title" data-translate="hero_title">Prijevoz, Čišćenje i Održavanje</h1>
+            <p class="hero-subtitle" data-translate="hero_subtitle">Profesionalne usluge diljem Slavonije</p>
+            <div class="hero-features">
+                <div class="feature-badge">
+                    <i class="fas fa-truck"></i>
+                    <span data-translate="hero_transport">Prijevoz i Dostava sa Instalacijom</span>
+                </div>
+                <div class="feature-badge">
+                    <i class="fas fa-broom"></i>
+                    <span data-translate="hero_cleaning">Čišćenje Prostora</span>
+                </div>
+                <div class="feature-badge">
+                    <i class="fas fa-leaf"></i>
+                    <span data-translate="hero_garden">Održavanje Zelenih Površina</span>
+                </div>
+            </div>
+            <a href="javascript:void(0)" class="cta-button" data-section="booking" data-translate="hero_cta">Rezerviraj sada</a>
+        </div>
+    </section>
+
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title" data-translate="services_title">Naše Usluge</h2>
+            <p class="section-subtitle" data-translate="services_subtitle">Sveobuhvatne usluge za privatne i poslovne korisnike</p>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-truck-loading"></i>
+                    </div>
+                    <h3 data-translate="service1_title">Prijevoz i Dostava sa Instalacijom</h3>
+                    <p data-translate="service1_desc">Dostava kućanskih aparata s ugradnjom, transport tereta, selidbe po EU, odvoz otpada</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-spray-can"></i>
+                    </div>
+                    <h3 data-translate="service2_title">Čišćenje Prostora</h3>
+                    <p data-translate="service2_desc">Redovito i dubinsko čišćenje, pranje prozora, dezinfekcija, čišćenje nakon renovacije</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 data-translate="service3_title">Održavanje Zelenih Površina</h3>
+                    <p data-translate="service3_desc">Košnja travnjaka, rezidba stabala i živica, hortikultura, zimska služba</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 data-translate="service4_title">Specijalne Usluge</h3>
+                    <p data-translate="service4_desc">Čišćenje poslovnih objekata, industrijskih hala, građevinskih radova i događanja</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 data-translate="service5_title">Najam Opreme</h3>
+                    <p data-translate="service5_desc">Najam frižidera za zabave, traktor kosilice i kombi vozila 3,5t</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title" data-translate="about_title">O nama</h2>
+                    <p data-translate="about_p1">LD Čalušić Usluge je obrt osnovan 2025. godine, specijaliziran za prijevoz svih vrsta tereta, odvoz električnog i glomaznog otpada te dostavu kućanskih uređaja s ugradnjom i priključkom.</p>
+                    <p data-translate="about_p2">S više od 7 godina iskustva u dostavi i montaži kućanskih aparata, nudimo pouzdanu i profesionalnu uslugu diljem Slavonije. Uz prijevoz, imamo višegodišnje iskustvo u čišćenju poslovnih i stambenih zgrada te održavanju zelenih javnih i privatnih površina.</p>
+                    <p data-translate="about_p3">Naš tim stručnjaka dostupan je 24 sata dnevno kako bi osigurao brzu i kvalitetnu uslugu za sve vaše potrebe.</p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-translate="feature1">Besplatni izlazak i ponuda</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-translate="feature2">Sve kategorije vozačke dozvole</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-translate="feature3">Dozvola za odvoz otpada</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-translate="feature4">Brze intervencije - Servis 48h</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="logo.png" alt="LD ČALUŠIĆ">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="booking" class="booking">
+        <div class="container">
+            <h2 class="section-title" data-translate="booking_title">Rezervirajte uslugu</h2>
+            <p class="section-subtitle" data-translate="booking_subtitle">Ispunite formu i kontaktirat ćemo vas u najkraćem roku</p>
+            <form class="booking-form" id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name" data-translate="form_name">Ime i prezime</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" data-translate="form_email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <button type="button" class="verify-btn" id="sendCodeBtn" style="margin-top: 10px; padding: 8px 15px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                            <i class="fas fa-envelope"></i> <span data-translate="verify_email">Pošalji verifikacijski kod</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row" id="verificationCodeRow" style="display: none;">
+                    <div class="form-group">
+                        <label for="verificationCode" data-translate="verification_code">Verifikacijski kod</label>
+                        <input type="text" id="verificationCode" name="verificationCode" placeholder="123456" maxlength="6" pattern="[0-9]{6}">
+                        <button type="button" class="verify-btn" id="verifyCodeBtn" style="margin-top: 10px; padding: 8px 15px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                            <i class="fas fa-check"></i> <span data-translate="verify_code_btn">Potvrdi kod</span>
+                        </button>
+                        <small style="color: var(--text-light); margin-top: 5px; display: block;" data-translate="enter_code">Unesite 6-znamenkasti kod</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone" data-translate="form_phone">Telefon *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+385 91 234 5678" pattern="[0-9+\s\(\)\-]{7,20}">
+                    </div>
+                    <div class="form-group">
+                        <label for="service" data-translate="form_service">Vrsta usluge</label>
+                        <select id="service" name="service" required>
+                            <option value="" data-translate="form_select">Odaberite uslugu</option>
+                            <option value="transport" data-translate="form_transport">Prijevoz i Dostava sa Instalacijom</option>
+                            <option value="cleaning" data-translate="form_cleaning">Čišćenje Prostora</option>
+                            <option value="garden" data-translate="form_garden">Održavanje Zelenih Površina</option>
+                            <option value="rental" data-translate="form_rental">Najam Opreme</option>
+                            <option value="special" data-translate="form_special">Specijalne Usluge</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="transportLocationFields">
+                    <div class="form-group">
+                        <label for="from" data-translate="form_from">Polazište</label>
+                        <input type="text" id="from" name="from">
+                    </div>
+                    <div class="form-group">
+                        <label for="to" data-translate="form_to">Odredište</label>
+                        <input type="text" id="to" name="to">
+                    </div>
+                </div>
+                <div class="form-row" id="distanceDisplay" style="display: none;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1e5ba8;">
+                            <p style="margin: 0; color: #1e5ba8; font-weight: 600;">
+                                <i class="fas fa-route"></i> <span data-translate="distance_label">Udaljenost:</span> <span id="distanceValue">-</span> km
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row" id="fixedLocationField" style="display: none;">
+                    <div class="form-group">
+                        <label for="location" data-translate="form_location">Lokacija</label>
+                        <input type="text" id="location" name="location">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date" data-translate="form_date">Datum</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time" data-translate="form_time">Vrijeme</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="message" data-translate="form_message">Dodatne informacije</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="form_submit">Pošalji zahtjev</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title" data-translate="contact_title">Kontaktirajte nas</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fas fa-phone"></i>
+                    <h3 data-translate="contact_phone">Telefon</h3>
+                    <p>097 684 1992</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-user"></i>
+                    <h3 data-translate="contact_owner">Vlasnik</h3>
+                    <p>Dario Čalušić</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3 data-translate="contact_address">Adresa</h3>
+                    <p>Gorana Jurića 8<br>35000 Gornja Vrba</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3 data-translate="contact_email">Email</h3>
+                    <p>info@ldcalusic.hr</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>LD ČALUŠIĆ</h3>
+                    <p data-translate="footer_desc">Usluge i prijevoz diljem Slavonije</p>
+                </div>
+                <div class="footer-section">
+                    <h4 data-translate="footer_links">Brzi linkovi</h4>
+                    <ul>
+                        <li><a href="#home" data-translate="nav_home">Početna</a></li>
+                        <li><a href="#services" data-translate="nav_services">Usluge</a></li>
+                        <li><a href="#about" data-translate="nav_about">O nama</a></li>
+                        <li><a href="#contact" data-translate="nav_contact">Kontakt</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 data-translate="footer_follow">Pratite nas</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LD ČALUŠIĆ. <span data-translate="footer_rights">Sva prava pridržana.</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-translate="login_title">Prijava</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail" data-translate="form_email">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" data-translate="login_password">Lozinka</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="loginPassword" required>
+                        <i class="fas fa-eye password-toggle" data-target="loginPassword"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <a href="javascript:void(0)" id="forgotPasswordLink" class="forgot-password-link">Zaboravili ste lozinku?</a>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="auth_login">Prijava</button>
+                <div class="divider">
+                    <span>ili</span>
+                </div>
+                <button type="button" class="google-btn" id="googleLoginBtn">
+                    <i class="fab fa-google"></i> Prijavi se sa Google
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-translate="register_title">Registracija</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName" data-translate="form_name">Ime i prezime</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail" data-translate="form_email">Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone" data-translate="form_phone">Telefon</label>
+                    <input type="tel" id="regPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword" data-translate="login_password">Lozinka</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="regPassword" required minlength="8">
+                        <i class="fas fa-eye password-toggle" data-target="regPassword"></i>
+                    </div>
+                    <div class="password-requirements">
+                        <p class="requirement-title">Lozinka mora sadržavati:</p>
+                        <ul class="requirements-list">
+                            <li id="req-length" class="requirement-item">
+                                <i class="fas fa-check-circle"></i> Najmanje 8 znakova
+                            </li>
+                            <li id="req-uppercase" class="requirement-item">
+                                <i class="fas fa-check-circle"></i> Jedno veliko slovo
+                            </li>
+                            <li id="req-lowercase" class="requirement-item">
+                                <i class="fas fa-check-circle"></i> Jedno malo slovo
+                            </li>
+                            <li id="req-number" class="requirement-item">
+                                <i class="fas fa-check-circle"></i> Jedan broj
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="regPasswordConfirm">Potvrdi lozinku</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="regPasswordConfirm" required minlength="8">
+                        <i class="fas fa-eye password-toggle" data-target="regPasswordConfirm"></i>
+                    </div>
+                    <span id="passwordMatchError" class="error-message" style="display: none;">Lozinke se ne podudaraju</span>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="auth_register">Registracija</button>
+                <div class="divider">
+                    <span>ili</span>
+                </div>
+                <button type="button" class="google-btn" id="googleRegisterBtn">
+                    <i class="fab fa-google"></i> Registriraj se sa Google
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="notification.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="auth-check.js"></script>
+    <script type="module" src="script.js"></script>
+    <script>
+        // Load Google Maps API after page loads
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB8CHUX3tIvS0uk1d-_cOhfhrtbUp_qZhs&libraries=places&loading=async';
+            script.async = true;
+            script.defer = true;
+            script.onload = function() {
+                // Initialize maps after script loads
+                if (window.initMap) {
+                    window.initMap();
+                }
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Load Google Maps when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+        } else {
+            loadGoogleMaps();
+        }
+    </script>
+</body>
+</html>
