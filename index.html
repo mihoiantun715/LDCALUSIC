@@ -396,17 +396,22 @@
     <script>
         // Load Google Maps API after page loads
         function loadGoogleMaps() {
+            // Check if already loaded
+            if (window.google && window.google.maps) {
+                console.log('Google Maps already loaded');
+                if (window.initMap) window.initMap();
+                return;
+            }
+            
             const script = document.createElement('script');
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB8CHUX3tIvS0uk1d-_cOhfhrtbUp_qZhs&libraries=places&loading=async';
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB8CHUX3tIvS0uk1d-_cOhfhrtbUp_qZhs&libraries=places&callback=initMap&loading=async';
             script.async = true;
             script.defer = true;
-            script.onload = function() {
-                // Initialize maps after script loads
-                if (window.initMap) {
-                    window.initMap();
-                }
+            script.onerror = function() {
+                console.error('Failed to load Google Maps API');
             };
             document.head.appendChild(script);
+            console.log('Loading Google Maps API...');
         }
         
         // Load Google Maps when DOM is ready
