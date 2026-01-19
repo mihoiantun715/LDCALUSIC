@@ -1,0 +1,11 @@
+public/
+functions/
+node_modules/
+.firebase/
+.firebaserc
+firebase.json
+firestore.rules
+firestore.indexes.json
+.github/
+*.md
+!README.md
