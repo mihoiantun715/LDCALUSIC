@@ -375,6 +375,9 @@ window.initAdminMap = function() {
     }
 }
 
+let selectedRoutes = [];
+let allRouteBookings = [];
+
 async function loadRoutesMap() {
     const result = await getAllBookings();
     
@@ -383,13 +386,23 @@ async function loadRoutesMap() {
         return;
     }
     
+    // Get status filter value
+    const statusFilter = document.getElementById('routeStatusFilter')?.value || 'all';
+    
     // Filter out cancelled bookings and only show transport with from/to
-    const bookings = result.bookings.filter(b => 
+    let bookings = result.bookings.filter(b => 
         b.from && 
         b.to && 
         b.serviceCategory === 'transport' && 
         b.status !== 'cancelled'
     );
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+        bookings = bookings.filter(b => b.status === statusFilter);
+    }
+    
+    allRouteBookings = bookings;
     
     if (bookings.length === 0) {
         document.getElementById('routesList').innerHTML = '<p class="no-data">Nema dostupnih ruta za prikaz</p>';
@@ -417,27 +430,39 @@ async function loadRoutesMap() {
     routesList.innerHTML = '';
     
     bookings.forEach((booking, index) => {
-        const color = '#1e5ba8'; // Blue color for all routes
+        const isSelected = selectedRoutes.includes(booking.id);
+        const color = isSelected ? '#e31e24' : '#1e5ba8'; // Red if selected, blue otherwise
         
         // Get Croatian service name
         const serviceName = getServiceNameCroatian(booking.service);
+        
+        // Shorten addresses for display
+        const fromShort = booking.from.split(',')[0];
+        const toShort = booking.to.split(',')[0];
         
         // Create route card
         const routeCard = document.createElement('div');
         routeCard.className = 'route-card';
         routeCard.style.borderLeft = `4px solid ${color}`;
         routeCard.style.cursor = 'pointer';
-        routeCard.onclick = () => viewBooking(booking.id);
+        routeCard.style.background = isSelected ? 'rgba(227, 30, 36, 0.05)' : 'white';
+        routeCard.setAttribute('data-booking-id', booking.id);
+        
         routeCard.innerHTML = `
             <div class="route-header">
-                <h4>${serviceName}</h4>
+                <h4 style="font-size: 1rem; margin-bottom: 5px;">${serviceName}</h4>
                 <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
             </div>
-            <div class="route-details">
-                <div><i class="fas fa-map-marker-alt" style="color: green;"></i> <strong>Od:</strong> ${booking.from}</div>
-                <div><i class="fas fa-map-marker-alt" style="color: red;"></i> <strong>Do:</strong> ${booking.to}</div>
-                <div><i class="fas fa-calendar"></i> ${booking.date} ${booking.time || ''}</div>
-                <div><i class="fas fa-user"></i> ${booking.name || booking.email}</div>
+            <div class="route-summary" style="font-size: 0.9rem; color: #666; margin: 8px 0;">
+                <strong>Od:</strong> ${fromShort} → <strong>Do:</strong> ${toShort}
+            </div>
+            <div class="route-actions" style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-small" onclick="event.stopPropagation(); toggleRouteSelection('${booking.id}')" style="flex: 1; padding: 6px 12px; font-size: 0.85rem; background: ${isSelected ? '#e31e24' : '#1e5ba8'}; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-${isSelected ? 'check' : 'plus'}"></i> ${isSelected ? 'Odabrano' : 'Odaberi'}
+                </button>
+                <button class="btn-small" onclick="event.stopPropagation(); viewBooking('${booking.id}')" style="padding: 6px 12px; font-size: 0.85rem; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-eye"></i> Detalji
+                </button>
             </div>
         `;
         routesList.appendChild(routeCard);
@@ -448,8 +473,8 @@ async function loadRoutesMap() {
             suppressMarkers: false,
             polylineOptions: {
                 strokeColor: color,
-                strokeWeight: 5,
-                strokeOpacity: 0.8,
+                strokeWeight: isSelected ? 7 : 5,
+                strokeOpacity: isSelected ? 1 : 0.6,
                 clickable: true
             },
             preserveViewport: index > 0
@@ -512,9 +537,107 @@ function getServiceNameCroatian(service) {
     return serviceNames[service] || service || 'Transport';
 }
 
+// Toggle route selection
+window.toggleRouteSelection = function(bookingId) {
+    const index = selectedRoutes.indexOf(bookingId);
+    if (index > -1) {
+        selectedRoutes.splice(index, 1);
+    } else {
+        selectedRoutes.push(bookingId);
+    }
+    
+    // Reload map to update colors
+    loadRoutesMap();
+    
+    // Show optimization button if multiple routes selected
+    updateOptimizationButton();
+}
+
+function updateOptimizationButton() {
+    let optimizeBtn = document.getElementById('optimizeRoutesBtn');
+    
+    if (selectedRoutes.length > 1) {
+        if (!optimizeBtn) {
+            optimizeBtn = document.createElement('button');
+            optimizeBtn.id = 'optimizeRoutesBtn';
+            optimizeBtn.className = 'btn-primary';
+            optimizeBtn.style.cssText = 'margin: 20px 0; padding: 12px 24px; width: 100%; font-size: 1rem;';
+            optimizeBtn.innerHTML = `<i class="fas fa-route"></i> Optimiziraj ${selectedRoutes.length} Ruta`;
+            optimizeBtn.onclick = optimizeSelectedRoutes;
+            
+            const routesList = document.getElementById('routesList');
+            routesList.insertBefore(optimizeBtn, routesList.firstChild);
+        } else {
+            optimizeBtn.innerHTML = `<i class="fas fa-route"></i> Optimiziraj ${selectedRoutes.length} Ruta`;
+        }
+    } else if (optimizeBtn) {
+        optimizeBtn.remove();
+    }
+}
+
+function optimizeSelectedRoutes() {
+    if (selectedRoutes.length < 2) return;
+    
+    const selectedBookings = allRouteBookings.filter(b => selectedRoutes.includes(b.id));
+    const routeNames = selectedBookings.map(b => getServiceNameCroatian(b.service)).join(', ');
+    
+    notify.success(`Optimizacija rute za: ${routeNames}`);
+    
+    // Clear previous routes and show only selected ones
+    directionsRenderers.forEach(renderer => renderer.setMap(null));
+    directionsRenderers = [];
+    
+    // Create waypoints for multi-stop route
+    const waypoints = [];
+    selectedBookings.forEach(booking => {
+        waypoints.push({
+            location: booking.from,
+            stopover: true
+        });
+        waypoints.push({
+            location: booking.to,
+            stopover: true
+        });
+    });
+    
+    // Calculate optimized route
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+        map: map,
+        suppressMarkers: false,
+        polylineOptions: {
+            strokeColor: '#e31e24',
+            strokeWeight: 6,
+            strokeOpacity: 0.8
+        }
+    });
+    
+    directionsRenderers.push(directionsRenderer);
+    
+    directionsService.route({
+        origin: selectedBookings[0].from,
+        destination: selectedBookings[selectedBookings.length - 1].to,
+        waypoints: waypoints.slice(2, -2), // Remove first origin and last destination
+        optimizeWaypoints: true,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, (response, status) => {
+        if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+            
+            const route = response.routes[0];
+            const distance = route.legs.reduce((sum, leg) => sum + leg.distance.value, 0) / 1000;
+            const duration = route.legs.reduce((sum, leg) => sum + leg.duration.value, 0) / 60;
+            
+            notify.success(`Optimizirana ruta: ${distance.toFixed(1)} km, ${Math.round(duration)} min`);
+        } else {
+            console.error('Route optimization failed:', status);
+            notify.error('Greška pri optimizaciji rute');
+        }
+    });
+}
+
 document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => {
     const status = e.target.value;
-    // Filter routes based on status
+    selectedRoutes = []; // Clear selection when filter changes
     loadRoutesMap();
 });
 
