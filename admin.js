@@ -522,32 +522,20 @@ async function loadRoutesMap() {
         
         let origin, destination;
         
-        if (booking.bookingType === 'destination') {
-            // For destination, find the corresponding origin
-            const originBooking = allRouteBookings.find(b => 
-                b.originalBookingId === booking.id && b.bookingType === 'origin'
-            );
-            if (originBooking) {
-                origin = originBooking.from;
-                destination = booking.from;
-            } else {
-                // Fallback: show from current location to destination
-                origin = booking.from;
-                destination = booking.from;
-            }
+        // For both origin and destination, show the complete route
+        const originBooking = booking.bookingType === 'origin' ? booking : 
+            allRouteBookings.find(b => b.originalBookingId === booking.id && b.bookingType === 'origin');
+        const destinationBooking = booking.bookingType === 'destination' ? booking : 
+            allRouteBookings.find(b => b.id === booking.originalBookingId && b.bookingType === 'destination');
+        
+        if (originBooking && destinationBooking) {
+            // Show complete route from origin to destination
+            origin = originBooking.from;
+            destination = destinationBooking.from;
         } else {
-            // For origin bookings, show from origin to its destination
-            const destinationBooking = allRouteBookings.find(b => 
-                b.id === booking.originalBookingId && b.bookingType === 'destination'
-            );
-            if (destinationBooking) {
-                origin = booking.from;
-                destination = destinationBooking.from;
-            } else {
-                // Fallback: show from origin to itself
-                origin = booking.from;
-                destination = booking.from;
-            }
+            // Fallback: show from current location to itself
+            origin = booking.from;
+            destination = booking.from;
         }
         
         directionsService.route({
