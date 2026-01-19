@@ -392,6 +392,15 @@
                                 <input type="text" id="locationTo" name="to">
                             </div>
                         </div>
+                        <div class="form-row" id="dashboardDistanceDisplay" style="display: none;">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1e5ba8;">
+                                    <p style="margin: 0; color: #1e5ba8; font-weight: 600;">
+                                        <i class="fas fa-route"></i> <span data-translate="distance_label">Udaljenost:</span> <span id="dashboardDistanceValue">-</span> km
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-row" id="fixedLocationRow" style="display: none;">
                             <div class="form-group">
                                 <label for="fixedLocation" data-translate="form_fixed_location">Lokacija</label>
@@ -453,5 +462,31 @@
     <script src="notification.js"></script>
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="dashboard.js"></script>
+    <script>
+        // Load Google Maps API for dashboard
+        function loadGoogleMapsDashboard() {
+            if (window.google && window.google.maps) {
+                console.log('Google Maps already loaded');
+                if (window.initDashboardMap) window.initDashboardMap();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVtCR6XBaKjIKtPPpo01IWu9e4lrjMRz8&libraries=places&callback=initDashboardMap&loading=async';
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                console.error('Failed to load Google Maps API');
+            };
+            document.head.appendChild(script);
+            console.log('Loading Google Maps API for dashboard...');
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadGoogleMapsDashboard);
+        } else {
+            loadGoogleMapsDashboard();
+        }
+    </script>
 </body>
 </html>

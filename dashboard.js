@@ -1,6 +1,11 @@
 // Import Firebase auth functions
 import { checkAuthState, getCurrentUser, createBooking, getUserBookings, cancelBooking, logoutUser, updateUserEmail, sendPasswordReset } from './firebase-auth.js';
 
+// Google Maps variables for dashboard
+let dashboardFromAutocomplete, dashboardToAutocomplete, dashboardLocationAutocomplete;
+let dashboardDistanceService;
+let dashboardMapsInitialized = false;
+
 const dashTranslations = {
     hr: {
         dash_new_booking: "Nova Rezervacija",
@@ -223,6 +228,103 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
         translateDashboard(lang);
     });
 });
+
+// Initialize Google Maps for dashboard
+window.initDashboardMap = function() {
+    if (typeof google === 'undefined' || !google.maps) {
+        console.log('Google Maps API not yet loaded for dashboard, retrying...');
+        setTimeout(window.initDashboardMap, 500);
+        return;
+    }
+    
+    if (dashboardMapsInitialized) {
+        console.log('Dashboard Google Maps already initialized');
+        return;
+    }
+    
+    try {
+        console.log('Initializing Google Maps autocomplete for dashboard...');
+        
+        // Initialize Distance Matrix Service
+        dashboardDistanceService = new google.maps.DistanceMatrixService();
+        
+        // Initialize autocomplete for transport fields
+        const fromInput = document.getElementById('locationFrom');
+        const toInput = document.getElementById('locationTo');
+        const locationInput = document.getElementById('fixedLocation');
+        
+        if (fromInput) {
+            dashboardFromAutocomplete = new google.maps.places.Autocomplete(fromInput, {
+                types: ['address'],
+                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+            });
+            
+            dashboardFromAutocomplete.addListener('place_changed', calculateDashboardDistance);
+            console.log('✓ Dashboard From input autocomplete initialized');
+        }
+        
+        if (toInput) {
+            dashboardToAutocomplete = new google.maps.places.Autocomplete(toInput, {
+                types: ['address'],
+                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+            });
+            
+            dashboardToAutocomplete.addListener('place_changed', calculateDashboardDistance);
+            console.log('✓ Dashboard To input autocomplete initialized');
+        }
+        
+        if (locationInput) {
+            dashboardLocationAutocomplete = new google.maps.places.Autocomplete(locationInput, {
+                types: ['address'],
+                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+            });
+            console.log('✓ Dashboard Location input autocomplete initialized');
+        }
+        
+        dashboardMapsInitialized = true;
+        console.log('✅ Dashboard Google Maps initialization complete!');
+    } catch (error) {
+        console.error('❌ Error initializing dashboard Google Maps:', error);
+    }
+};
+
+// Calculate distance for dashboard
+function calculateDashboardDistance() {
+    const fromInput = document.getElementById('locationFrom');
+    const toInput = document.getElementById('locationTo');
+    const distanceDisplay = document.getElementById('dashboardDistanceDisplay');
+    const distanceValue = document.getElementById('dashboardDistanceValue');
+    
+    if (!fromInput || !toInput || !fromInput.value || !toInput.value) {
+        if (distanceDisplay) distanceDisplay.style.display = 'none';
+        return;
+    }
+    
+    if (!dashboardDistanceService) {
+        console.log('Distance service not initialized yet');
+        return;
+    }
+    
+    dashboardDistanceService.getDistanceMatrix({
+        origins: [fromInput.value],
+        destinations: [toInput.value],
+        travelMode: google.maps.TravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.METRIC
+    }, (response, status) => {
+        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+            const distance = response.rows[0].elements[0].distance;
+            const distanceInKm = (distance.value / 1000).toFixed(1);
+            
+            if (distanceValue) distanceValue.textContent = distanceInKm;
+            if (distanceDisplay) distanceDisplay.style.display = 'flex';
+            
+            console.log('✓ Dashboard distance calculated:', distanceInKm, 'km');
+        } else {
+            console.log('Distance calculation failed:', status);
+            if (distanceDisplay) distanceDisplay.style.display = 'none';
+        }
+    });
+}
 
 // Check authentication state
 let currentUser = null;
