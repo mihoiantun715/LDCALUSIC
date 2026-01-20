@@ -32,6 +32,18 @@
         left: 0;
     }
 
+    .nav-menu .nav-link {
+        color: var(--dark-blue);
+        text-shadow: none;
+        display: block;
+        padding: 15px 0;
+    }
+
+    .nav-menu .nav-link:hover {
+        color: var(--primary-blue);
+        transform: none;
+    }
+
     .hamburger {
         display: flex;
     }
