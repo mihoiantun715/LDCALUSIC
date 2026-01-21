@@ -720,6 +720,115 @@ async function loadRoutesMap() {
             });
         }
     });
+    
+    // Draw sequential route connecting all positioned bookings
+    drawSequentialRoute(bookings);
+}
+
+// Draw a sequential route connecting all positioned bookings in order
+function drawSequentialRoute(bookings) {
+    // Filter bookings with positions and sort by position
+    const positionedBookings = bookings.filter(b => b.position !== null && b.position !== undefined)
+        .sort((a, b) => a.position - b.position);
+    
+    if (positionedBookings.length < 2) {
+        // Need at least 2 bookings to draw a route
+        return;
+    }
+    
+    // Create waypoints from all booking locations
+    const waypoints = [];
+    const locations = [];
+    
+    positionedBookings.forEach(booking => {
+        locations.push(booking.from);
+    });
+    
+    // Use first location as origin, last as destination, rest as waypoints
+    const origin = locations[0];
+    const destination = locations[locations.length - 1];
+    
+    // Add middle locations as waypoints (max 25 waypoints for Google Maps API)
+    for (let i = 1; i < locations.length - 1 && i < 24; i++) {
+        waypoints.push({
+            location: locations[i],
+            stopover: true
+        });
+    }
+    
+    // Draw the sequential route
+    const sequentialRenderer = new google.maps.DirectionsRenderer({
+        map: map,
+        suppressMarkers: true, // We already have numbered markers
+        polylineOptions: {
+            strokeColor: '#28a745', // Green for sequential route
+            strokeWeight: 4,
+            strokeOpacity: 0.7,
+            zIndex: 1 // Below individual routes
+        },
+        preserveViewport: true
+    });
+    
+    directionsRenderers.push(sequentialRenderer);
+    
+    directionsService.route({
+        origin: origin,
+        destination: destination,
+        waypoints: waypoints,
+        optimizeWaypoints: false, // Keep the order as set by positions
+        travelMode: google.maps.TravelMode.DRIVING
+    }, (response, status) => {
+        if (status === 'OK') {
+            sequentialRenderer.setDirections(response);
+            
+            // Calculate total distance and duration
+            let totalDistance = 0;
+            let totalDuration = 0;
+            
+            response.routes[0].legs.forEach(leg => {
+                totalDistance += leg.distance.value;
+                totalDuration += leg.duration.value;
+            });
+            
+            // Display route summary
+            const distanceKm = (totalDistance / 1000).toFixed(1);
+            const durationMin = Math.round(totalDuration / 60);
+            const durationHours = Math.floor(durationMin / 60);
+            const durationMinutes = durationMin % 60;
+            
+            const durationText = durationHours > 0 
+                ? `${durationHours}h ${durationMinutes}min` 
+                : `${durationMinutes}min`;
+            
+            console.log(`Sequential route: ${distanceKm} km, ${durationText}`);
+            
+            // Add route summary to the UI
+            const routesList = document.getElementById('routesList');
+            const existingSummary = document.getElementById('routeSummary');
+            if (existingSummary) {
+                existingSummary.remove();
+            }
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.id = 'routeSummary';
+            summaryDiv.style.cssText = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+            summaryDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <i class="fas fa-route" style="font-size: 2rem;"></i>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 1.1rem;">Sekvencijalna Ruta (${positionedBookings.length} lokacija)</h3>
+                        <div style="font-size: 0.95rem; opacity: 0.9;">
+                            <i class="fas fa-road"></i> ${distanceKm} km &nbsp;&nbsp;
+                            <i class="fas fa-clock"></i> ${durationText}
+                        </div>
+                    </div>
+                </div>
+            `;
+            routesList.insertBefore(summaryDiv, routesList.children[1]);
+        } else {
+            console.error('Sequential route request failed:', status);
+        }
+    });
 }
 
 // Get Croatian service name
