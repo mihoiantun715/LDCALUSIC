@@ -493,8 +493,24 @@ async function loadRoutesMap() {
         const serviceName = getServiceNameCroatian(booking.service);
         
         // Shorten addresses for display
-        const fromShort = booking.from.split(',')[0];
-        const toShort = booking.to.split(',')[0];
+        const fromShort = booking.from ? booking.from.split(',')[0] : '';
+        const toShort = booking.to && booking.to.trim() !== '' ? booking.to.split(',')[0] : '';
+        
+        // Determine display location based on booking type
+        let displayLocation = fromShort;
+        let locationPrefix = 'Od';
+        
+        if (booking.bookingType === 'origin') {
+            displayLocation = fromShort;
+            locationPrefix = 'Polazište';
+        } else if (booking.bookingType === 'destination') {
+            displayLocation = fromShort; // For destination bookings, 'from' contains the destination address
+            locationPrefix = 'Odredište';
+        } else if (toShort) {
+            // Regular booking with both from and to
+            displayLocation = `${fromShort} → ${toShort}`;
+            locationPrefix = 'Ruta';
+        }
         
         // Create route card
         const routeCard = document.createElement('div');
@@ -520,7 +536,7 @@ async function loadRoutesMap() {
                 <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
             </div>
             <div class="route-summary" style="font-size: 0.9rem; color: #666; margin: 8px 0;">
-                <strong>${booking.bookingType === 'destination' ? 'Do' : 'Od'}:</strong> ${booking.bookingType === 'destination' ? toShort : fromShort}
+                <strong>${locationPrefix}:</strong> ${displayLocation}
             </div>
             <div class="route-actions" style="display: flex; gap: 8px; margin-top: 10px;">
                 <button onclick="event.stopPropagation(); movePosition('${booking.id}', 'up')" style="padding: 6px 10px; font-size: 0.85rem; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;" ${booking.position === null || booking.position === 0 ? 'disabled' : ''}>

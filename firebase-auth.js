@@ -258,7 +258,12 @@ export async function createBooking(bookingData) {
             return { success: false, message: 'Morate biti prijavljeni' };
         }
         
-        const isTransport = bookingData.serviceCategory === 'transport' && bookingData.from && bookingData.to;
+        const isTransport = (
+            bookingData.serviceCategory === 'transport' || 
+            bookingData.service === 'transport' || 
+            bookingData.service === 'vehicle_transport' ||
+            bookingData.service === 'Prijevoz i Dostava sa Instalacijom'
+        ) && bookingData.from && bookingData.to && bookingData.to.trim() !== '';
         
         if (isTransport) {
             // Split into 2 bookings for transport: origin and destination
@@ -337,7 +342,12 @@ export async function createBooking(bookingData) {
 // Create public booking (for non-authenticated users)
 export async function createPublicBooking(bookingData) {
     try {
-        const isTransport = bookingData.service === 'transport' && bookingData.from && bookingData.to;
+        const isTransport = (
+            bookingData.serviceCategory === 'transport' || 
+            bookingData.service === 'transport' || 
+            bookingData.service === 'vehicle_transport' ||
+            bookingData.service === 'Prijevoz i Dostava sa Instalacijom'
+        ) && bookingData.from && bookingData.to && bookingData.to.trim() !== '';
         
         if (isTransport) {
             // Split into 2 bookings for transport: origin and destination
