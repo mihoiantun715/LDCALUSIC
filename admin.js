@@ -413,7 +413,6 @@ async function loadRoutesMap() {
     
     let bookings = result.bookings.filter(b => 
         b.from && 
-        b.to && 
         (b.serviceCategory === 'transport' || 
          b.service === 'transport' || 
          b.service === 'vehicle_transport' ||
@@ -555,94 +554,139 @@ async function loadRoutesMap() {
         
         directionsRenderers.push(directionsRenderer);
         
-        let origin, destination;
-        
-        // For both origin and destination, show the complete route
-        const originBooking = booking.bookingType === 'origin' ? booking : 
-            allRouteBookings.find(b => b.originalBookingId === booking.id && b.bookingType === 'origin');
-        const destinationBooking = booking.bookingType === 'destination' ? booking : 
-            allRouteBookings.find(b => b.id === booking.originalBookingId && b.bookingType === 'destination');
-        
-        if (originBooking && destinationBooking) {
-            // Show complete route from origin to destination
-            origin = originBooking.from;
-            destination = destinationBooking.from;
-        } else {
-            // Fallback: show from current location to itself
-            origin = booking.from;
-            destination = booking.from;
-        }
-        
-        directionsService.route({
-            origin: origin,
-            destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING
-        }, (response, status) => {
-            if (status === 'OK') {
-                directionsRenderer.setDirections(response);
-                
-                // Store route data for distance/time display
-                if (response.routes[0] && response.routes[0].legs[0]) {
-                    const leg = response.routes[0].legs[0];
-                    booking.distance = leg.distance.text;
-                    booking.duration = leg.duration.text;
-                    booking.distanceValue = leg.distance.value;
-                    booking.durationValue = leg.duration.value;
+        // Check if booking has both from and to locations
+        if (booking.to && booking.to.trim() !== '') {
+            // Has destination - draw route
+            let origin, destination;
+            
+            // For both origin and destination, show the complete route
+            const originBooking = booking.bookingType === 'origin' ? booking : 
+                allRouteBookings.find(b => b.originalBookingId === booking.id && b.bookingType === 'origin');
+            const destinationBooking = booking.bookingType === 'destination' ? booking : 
+                allRouteBookings.find(b => b.id === booking.originalBookingId && b.bookingType === 'destination');
+            
+            if (originBooking && destinationBooking) {
+                // Show complete route from origin to destination
+                origin = originBooking.from;
+                destination = destinationBooking.from;
+            } else {
+                // Use from and to from current booking
+                origin = booking.from;
+                destination = booking.to;
+            }
+            
+            directionsService.route({
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (response, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(response);
+                    
+                    // Store route data for distance/time display
+                    if (response.routes[0] && response.routes[0].legs[0]) {
+                        const leg = response.routes[0].legs[0];
+                        booking.distance = leg.distance.text;
+                        booking.duration = leg.duration.text;
+                        booking.distanceValue = leg.distance.value;
+                        booking.durationValue = leg.duration.value;
+                    }
+                    
+                    // Add custom numbered marker
+                    if (booking.position !== null && booking.position !== undefined) {
+                        const position = response.routes[0].legs[0].start_location;
+                        const marker = new google.maps.Marker({
+                            position: position,
+                            map: map,
+                            label: {
+                                text: String(booking.position + 1),
+                                color: 'white',
+                                fontSize: '14px',
+                                fontWeight: 'bold'
+                            },
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 20,
+                                fillColor: color,
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 3
+                            },
+                            title: `${booking.position + 1}. ${booking.name || booking.email}`
+                        });
+                        
+                        marker.addListener('click', () => {
+                            viewBooking(booking.id);
+                        });
+                    }
+                    
+                    // Add click listener to polyline
+                    google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
+                        const directions = directionsRenderer.getDirections();
+                        if (directions) {
+                            const polyline = directionsRenderer.getDirections().routes[0].overview_path;
+                            
+                            // Create invisible clickable overlay
+                            const routePath = new google.maps.Polyline({
+                                path: polyline,
+                                strokeColor: color,
+                                strokeWeight: 10,
+                                strokeOpacity: 0,
+                                map: map,
+                                clickable: true
+                            });
+                            
+                            routePath.addListener('click', () => {
+                                viewBooking(booking.id);
+                            });
+                        }
+                    });
+                } else {
+                    console.error('Directions request failed:', status);
                 }
-                
-                // Add custom numbered marker
-                if (booking.position !== null && booking.position !== undefined) {
-                    const position = response.routes[0].legs[0].start_location;
+            });
+        } else {
+            // Only has 'from' location - show marker only
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: booking.from }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const position = results[0].geometry.location;
+                    
+                    // Create marker for pickup location
                     const marker = new google.maps.Marker({
                         position: position,
                         map: map,
-                        label: {
+                        label: booking.position !== null && booking.position !== undefined ? {
                             text: String(booking.position + 1),
                             color: 'white',
                             fontSize: '14px',
                             fontWeight: 'bold'
-                        },
+                        } : undefined,
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: 20,
+                            scale: booking.position !== null && booking.position !== undefined ? 20 : 15,
                             fillColor: color,
                             fillOpacity: 1,
                             strokeColor: 'white',
                             strokeWeight: 3
                         },
-                        title: `${booking.position + 1}. ${booking.name || booking.email}`
+                        title: `${booking.position !== null && booking.position !== undefined ? (booking.position + 1) + '. ' : ''}${booking.name || booking.email} - ${booking.from}`
                     });
                     
                     marker.addListener('click', () => {
                         viewBooking(booking.id);
                     });
-                }
-                
-                // Add click listener to polyline
-                google.maps.event.addListener(directionsRenderer, 'directions_changed', function() {
-                    const directions = directionsRenderer.getDirections();
-                    if (directions) {
-                        const polyline = directionsRenderer.getDirections().routes[0].overview_path;
-                        
-                        // Create invisible clickable overlay
-                        const routePath = new google.maps.Polyline({
-                            path: polyline,
-                            strokeColor: color,
-                            strokeWeight: 10,
-                            strokeOpacity: 0,
-                            map: map,
-                            clickable: true
-                        });
-                        
-                        routePath.addListener('click', () => {
-                            viewBooking(booking.id);
-                        });
+                    
+                    // Center map on first marker if this is the first booking
+                    if (index === 0) {
+                        map.setCenter(position);
+                        map.setZoom(12);
                     }
-                });
-            } else {
-                console.error('Directions request failed:', status);
-            }
-        });
+                } else {
+                    console.error('Geocoding failed for:', booking.from, status);
+                }
+            });
+        }
     });
 }
 
