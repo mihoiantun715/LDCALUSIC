@@ -434,11 +434,21 @@ async function loadRoutesMap() {
     const routesList = document.getElementById('routesList');
     routesList.innerHTML = '';
     
+    // Check if any bookings don't have positions
+    const bookingsWithoutPositions = bookings.filter(b => b.position === null || b.position === undefined).length;
+    
     // Add position management header
     const positionHeader = document.createElement('div');
     positionHeader.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;';
     positionHeader.innerHTML = `
         <h3 style="margin: 0 0 10px 0; font-size: 1.1rem;"><i class="fas fa-sort"></i> Upravljanje Pozicijama</h3>
+        ${bookingsWithoutPositions > 0 ? `
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+            <i class="fas fa-exclamation-triangle" style="color: #856404;"></i>
+            <strong style="color: #856404;">Pozicije nisu dodijeljene!</strong>
+            <span style="color: #856404;"> ${bookingsWithoutPositions} ugovor(a) nema dodijeljenu poziciju. Kliknite "Auto Dodijeli Pozicije" za automatsku dodjelu.</span>
+        </div>
+        ` : ''}
         <button onclick="autoAssignPositions()" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem; margin-right: 10px;">
             <i class="fas fa-magic"></i> Auto Dodijeli Pozicije
         </button>
@@ -522,7 +532,7 @@ async function loadRoutesMap() {
         
         const positionBadge = booking.position !== null && booking.position !== undefined 
             ? `<span style="background: #28a745; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">#${booking.position + 1}</span>` 
-            : '<span style="background: #6c757d; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem;">-</span>';
+            : '<span style="background: #ffc107; color: #000; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;" title="Kliknite \'Auto Dodijeli Pozicije\' za dodjelu pozicija">?</span>';
         
         const bookingTypeLabel = booking.bookingType ? `<span style="font-size: 0.8rem; color: #666; margin-left: 8px;">(${booking.locationLabel || booking.bookingType})</span>` : '';
         
@@ -669,24 +679,30 @@ async function loadRoutesMap() {
                     const position = results[0].geometry.location;
                     
                     // Create marker for pickup location
+                    const hasPosition = booking.position !== null && booking.position !== undefined;
                     const marker = new google.maps.Marker({
                         position: position,
                         map: map,
-                        label: booking.position !== null && booking.position !== undefined ? {
+                        label: hasPosition ? {
                             text: String(booking.position + 1),
                             color: 'white',
                             fontSize: '14px',
                             fontWeight: 'bold'
-                        } : undefined,
+                        } : {
+                            text: '?',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        },
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: booking.position !== null && booking.position !== undefined ? 20 : 15,
-                            fillColor: color,
+                            scale: hasPosition ? 20 : 15,
+                            fillColor: hasPosition ? color : '#6c757d',
                             fillOpacity: 1,
                             strokeColor: 'white',
                             strokeWeight: 3
                         },
-                        title: `${booking.position !== null && booking.position !== undefined ? (booking.position + 1) + '. ' : ''}${booking.name || booking.email} - ${booking.from}`
+                        title: `${hasPosition ? (booking.position + 1) + '. ' : '[Bez pozicije] '}${booking.name || booking.email} - ${booking.from}`
                     });
                     
                     marker.addListener('click', () => {
