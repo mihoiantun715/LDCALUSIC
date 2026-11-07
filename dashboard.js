@@ -624,6 +624,7 @@ function getStatusText(status) {
     const statusTexts = {
         cancelled: currentDashLang === 'hr' ? 'Otkazano' : 'Cancelled',
         pending: currentDashLang === 'hr' ? 'Na čekanju' : 'Pending',
+        in_transit: currentDashLang === 'hr' ? 'Dostava je krenula' : 'Delivery underway',
         confirmed: currentDashLang === 'hr' ? 'Potvrđeno' : 'Confirmed',
         completed: currentDashLang === 'hr' ? 'Završeno' : 'Completed'
     };
@@ -637,3 +638,4 @@ document.getElementById('bookingDate').setAttribute('min', today);
 toggleLocationFields("transport");
 
 ['locationFrom','locationTo'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{document.getElementById('dashboardDistanceDisplay').style.display='none';}));
+

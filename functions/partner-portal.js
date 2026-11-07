@@ -7,7 +7,7 @@ function validatePartnerOrder(data){
  if(b.appointmentType!=='flexible'&&!b.requestedDate)throw Error('Unesite datum termina.');
  validateDate(b.requestedDate,b.requestedTime);
  if(b.approxWeight&&(!Number.isFinite(Number(b.approxWeight))||Number(b.approxWeight)<0))throw Error('Težina mora biti pozitivan broj.');
- return b;
+ return {...b,...require('./delivery-fields').handlingFields(data)};
 }
 function validateDate(date,time){
  if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date))throw Error('Datum nije valjan.');
@@ -43,7 +43,7 @@ function createPartnerHandler({admin,functions}){return async(data,context)=>{
  const ref=db.collection('bookings').doc(text(data.id,128));await db.runTransaction(async tx=>{const snap=await tx.get(ref),b=snap.data();if(!b||b.source!=='partner')fail('not-found','Partnerski zahtjev nije pronađen.');if(['cancelled','completed'].includes(b.status))fail('failed-precondition','Zatvoren zahtjev ne može se rasporediti.');tx.update(ref,{date,time,position:null,routePlanDate:null,routeDriver:null,scheduledBy:uid,updatedAt:stamp()});});return {success:true};
  }
  const member=await memberRef.get();if(!member.exists||!member.data().active||member.data().deleted||member.data().companyId!=='jysk')fail('permission-denied','Pristup još nije odobren ili je deaktiviran.');
- if(action==='orders'){const docs=await db.collection('bookings').where('partnerUserId','==',uid).get();return {orders:docs.docs.map(d=>{const b=d.data();return {id:d.id,name:b.name,phone:b.phone,from:b.from,to:b.to,orderNumber:b.orderNumber,status:b.status,date:b.date,time:b.time,requestedDate:b.requestedDate,requestedTime:b.requestedTime,appointmentType:b.appointmentType,createdAt:b.createdAt?.toMillis()||0};}).sort((a,b)=>b.createdAt-a.createdAt)};}
+ if(action==='orders'){const docs=await db.collection('bookings').where('partnerUserId','==',uid).get();return {orders:docs.docs.map(d=>{const b=d.data();return {id:d.id,name:b.name,phone:b.phone,from:b.from,to:b.to,orderNumber:b.orderNumber,status:b.status,date:b.date,time:b.time,requestedDate:b.requestedDate,requestedTime:b.requestedTime,appointmentType:b.appointmentType,handlingSummary:b.handlingSummary||'',serviceDescription:b.serviceDescription||'',notes:b.notes||'',statusUpdatedAt:b.statusUpdatedAt?.toMillis()||0,createdAt:b.createdAt?.toMillis()||0};}).sort((a,b)=>b.createdAt-a.createdAt)};}
  if(action==='submit'){
  let b;try{b=validatePartnerOrder(data);}catch(e){fail('invalid-argument',e.message);}
  if(!/^[a-zA-Z0-9-]{20,64}$/.test(data.requestId||''))fail('invalid-argument','Osvježite obrazac.');

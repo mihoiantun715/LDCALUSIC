@@ -29,6 +29,7 @@ export function renderDriverPlan(doc,{date,dirty,groups,results=[],timeConflict=
  row(card,'Usluga',details.service);
  if(job.docs[0]?.source==='partner'){const b=job.docs[0];row(card,'Partner / narudžba','JYSK · '+(b.partnerStore||'')+' · '+(b.orderNumber||'—'));row(card,'Kontakt trgovine',(b.partnerContact||'')+' '+(b.partnerPhone||''));}
  job.stops.forEach((address,index)=>row(card,job.stops.length===1?'Lokacija':index===0?'Preuzimanje':'Dostava',address));
+ if(job.docs[0]?.handlingSummary)row(card,'Uvjeti dostave',job.docs[0].handlingSummary);
  row(card,'Opis / teret',details.description||'Dodatni opis nije naveden');
  if(details.weight)row(card,'Približna težina',details.weight);
  row(card,'Napomene klijenta',details.notes||'Nema dodatnih napomena');

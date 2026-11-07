@@ -1,4 +1,4 @@
-import {renderDriverPlan} from './driver-print.mjs?v=partner-1';
+import {renderDriverPlan} from './driver-print.mjs?v=tracking-1';
 import {buildJobs,stopsFor,chunks,moveJob,splitDrivers,updatesFor,swapCandidates,hasTimeConflict} from './route-core.mjs?v=manual-order-2';
 import {saveRoutePlan} from './route-store.js';
 export function createRoutePlanner({getBookings,canUse,onRecords,viewBooking,maps=()=>window.google?.maps,save=saveRoutePlan}){

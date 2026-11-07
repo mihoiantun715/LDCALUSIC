@@ -86,48 +86,8 @@ exports.sendStatusUpdateEmail = functions.firestore
     if (newData.bookingType === 'destination') return null;
     const bookingId = context.params.bookingId;
 
-    // Only send email if status changed
-    if (newData.status === oldData.status) {
-      return null;
-    }
-
-    const statusMessages = {
-      'pending': {
-        subject: 'Vaša rezervacija je zaprimljena',
-        message: 'Vaša rezervacija je zaprimljena i trenutno je u obradi. Kontaktirat ćemo vas uskoro.'
-      },
-      'confirmed': {
-        subject: 'Rezervacija potvrđena',
-        message: 'Vaša rezervacija je potvrđena! Radujemo se pružanju usluge.'
-      },
-      'completed': {
-        subject: 'Usluga završena - Hvala vam!',
-        message: 'Vaša usluga je uspješno završena. Hvala vam što ste odabrali LDCALUSIC PRIJEVOZ I USLUGE! Nadamo se da ste zadovoljni našom uslugom i veselimo se budućoj suradnji.'
-      },
-      'cancelled': {
-        subject: 'Rezervacija otkazana',
-        message: 'Vaša rezervacija je otkazana. Ako imate pitanja, kontaktirajte nas.'
-      }
-    };
-
-    const statusInfo = statusMessages[newData.status];
-    if (!statusInfo) return null;
-
-    const mailOptions = {
-      from: 'LDCALUSIC PRIJEVOZ I USLUGE <ldcalusicprijevoziusluge@gmail.com>',
-      to: newData.email,
-      subject: statusInfo.subject,
-      ...emailTemplates.status(newData, bookingId, statusInfo)
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log(`Status update email sent for booking ${bookingId}`);
-      return null;
-    } catch (error) {
-      console.error('Error sending status update email:', error);
-      return null;
-    }
+    await require('./status-notifications').sendStatusEmails(oldData,newData,bookingId,mail=>transporter.sendMail(mail));
+    return null;
   });
 
 // Public submissions are validated on the server; guests never gain database write access.

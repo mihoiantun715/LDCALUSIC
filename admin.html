@@ -128,7 +128,7 @@
                             <option value="all">Svi Statusi</option>
                             <option value="pending">Na Čekanju</option>
                             <option value="confirmed">Potvrđeno</option>
-                            <option value="completed">Završeno</option>
+                            <option value="in_transit">Dostava je krenula</option><option value="completed">Završeno</option>
                             <option value="cancelled">Otkazano</option>
                         </select>
                         <select id="serviceFilter" class="filter-select">
@@ -175,7 +175,7 @@
                             <option value="all">Aktivni prijevozi</option>
                             <option value="pending">Na Čekanju</option>
                             <option value="confirmed">Potvrđeno</option>
-                            <option value="completed">Završeno</option>
+                            <option value="in_transit">Dostava je krenula</option><option value="completed">Završeno</option>
                         </select>
                     </div>
                 </div>
@@ -324,7 +324,7 @@
                 <select id="modalStatusSelect" class="status-select">
                     <option value="pending">Na Čekanju</option>
                     <option value="confirmed">Potvrđeno</option>
-                    <option value="completed">Završeno</option>
+                    <option value="in_transit">Dostava je krenula</option><option value="completed">Završeno</option>
                     <option value="cancelled">Otkazano</option>
                 </select>
                 <button class="btn-primary" onclick="updateStatus()">Ažuriraj Status</button>
@@ -346,7 +346,7 @@
 
     <script src="notification.js?v=2"></script>
     <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="admin.js?v=9"></script>
+    <script type="module" src="admin.js?v=10"></script>
     <script>
         // Load Google Maps API for route visualization
         function loadGoogleMapsAdmin() {

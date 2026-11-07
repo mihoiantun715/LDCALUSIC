@@ -5,6 +5,7 @@ function bookingEmails(b,id){
  const partner=b.source==='partner'&&b.partnerId==='jysk';
  const messages=[{from:'LD Čalušić <'+COMPANY_EMAIL+'>',to:COMPANY_EMAIL,subject:partner?'Novi zahtjev od JYSK-a'+(b.partnerStore?' — '+b.partnerStore:''):'Nova rezervacija na web stranici — LD Čalušić',...templates.booking(b,id,true)}];
  if(b.email)messages.push({from:'LD Čalušić <'+COMPANY_EMAIL+'>',to:b.email,subject:'Zaprimili smo vaš zahtjev — LD Čalušić',...templates.booking(b,id)});
+ if(partner&&b.partnerEmail&&!messages.some(m=>m.to.toLowerCase()===b.partnerEmail.toLowerCase()))messages.push({from:'LD Čalušić <'+COMPANY_EMAIL+'>',to:b.partnerEmail,subject:'JYSK · Potvrda primitka zahtjeva',...templates.partnerStatus(b,id,{subject:'Zahtjev je zaprimljen',message:'LD Čalušić zaprimio je vaš zahtjev. Prihvaćanje, termin i napredak dostave pratite u portalu i email obavijestima.'})});
  return messages;
 }
 async function sendBookingEmails(booking,id,sendMail,logger=console){
