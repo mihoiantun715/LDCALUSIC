@@ -242,7 +242,7 @@ async function loadServiceStats() {
 }
 
 window.makeAdmin = async function(userId, email, name) {
-    if (!confirm(`Are you sure you want to make ${name} an admin?`)) {
+    if (!await notify.ask(`Dodijeliti administratorske ovlasti korisniku ${name}?`)) {
         return;
     }
     
@@ -264,7 +264,7 @@ window.makeAdmin = async function(userId, email, name) {
 }
 
 window.removeAdmin = async function(userId) {
-    if (!confirm('Are you sure you want to remove admin privileges from this user?')) {
+    if (!await notify.ask('Ukloniti administratorske ovlasti ovom korisniku?')) {
         return;
     }
     
@@ -281,7 +281,7 @@ window.removeAdmin = async function(userId) {
 }
 
 window.deleteUser = async function(userId, userName) {
-    if (!confirm(`Are you sure you want to delete user ${userName}? This action cannot be undone and will also delete all their bookings.`)) {
+    if (!await notify.ask(`Trajno obrisati korisnika ${userName} i njegove rezervacije? Ovu radnju nije moguće poništiti.`)) {
         return;
     }
     
@@ -984,7 +984,7 @@ window.movePosition = async function(bookingId, direction) {
 
 // Auto assign positions
 window.autoAssignPositions = async function() {
-    if (!confirm('Automatski dodijeliti pozicije svim rutama?')) return;
+    if (!await notify.ask('Automatski dodijeliti pozicije svim rutama?')) return;
     
     try {
         const { doc, updateDoc, db } = await import('./firebase-config.js');
@@ -1002,7 +1002,7 @@ window.autoAssignPositions = async function() {
 }
 
 // Split routes for multiple drivers
-window.splitRoutesForDrivers = function() {
+window.splitRoutesForDrivers = async function() {
     const totalRoutes = allRouteBookings.filter(b => b.position !== null).length;
     
     if (totalRoutes === 0) {
@@ -1010,7 +1010,7 @@ window.splitRoutesForDrivers = function() {
         return;
     }
     
-    const numDrivers = prompt(`Ukupno ruta: ${totalRoutes}\n\nNa koliko vozača želite podijeliti rute?`, '2');
+    const numDrivers = await notify.input(`Ukupno ruta: ${totalRoutes}\n\nNa koliko vozača želite podijeliti rute?`, '2', {type:'number',min:1,max:totalRoutes,title:'Raspodjela ruta',label:'Broj vozača'});
     if (!numDrivers || isNaN(numDrivers) || numDrivers < 1) return;
     
     const driversCount = parseInt(numDrivers);
@@ -1207,7 +1207,7 @@ window.viewBooking = function(bookingId) {
 async function acceptBooking() {
     if (!currentBookingId) return;
     
-    if (!confirm('Jeste li sigurni da želite prihvatiti ovu rezervaciju? Korisniku će biti poslan email.')) {
+    if (!await notify.ask('Jeste li sigurni da želite prihvatiti ovu rezervaciju? Korisniku će biti poslan email.')) {
         return;
     }
     
@@ -1232,7 +1232,7 @@ async function acceptBooking() {
 async function denyBooking() {
     if (!currentBookingId) return;
     
-    const reason = prompt('Unesite razlog odbijanja (bit će poslan korisniku):');
+    const reason = await notify.input('Unesite razlog odbijanja (bit će poslan korisniku):', '', {multiline:true,title:'Odbijanje rezervacije',label:'Razlog odbijanja'});
     if (!reason) return;
     
     try {

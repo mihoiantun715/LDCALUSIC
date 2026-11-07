@@ -584,7 +584,7 @@ async function loadBookings() {
                 'Jeste li sigurni da želite otkazati ovu rezervaciju?' : 
                 'Are you sure you want to cancel this booking?';
             
-            if (confirm(confirmMsg)) {
+            if (await notify.ask(confirmMsg)) {
                 const result = await cancelBooking(bookingId);
                 if (result.success) {
                     notify.success(currentDashLang === 'hr' ? 'Rezervacija otkazana' : 'Booking cancelled');
