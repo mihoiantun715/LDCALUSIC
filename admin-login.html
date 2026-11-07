@@ -174,7 +174,7 @@
         <p id="resetStatus" class="reset-status" role="status" aria-live="polite" hidden></p>
     </dialog>
     <script type="module">
-        import { loginAdmin, sendPasswordReset } from './firebase-auth.js';
+        import { loginAdmin, sendPasswordReset } from './firebase-auth.js?v=admin-access-2';
         const resetDialog=document.getElementById('resetDialog'),resetEmail=document.getElementById('resetEmail'),resetStatus=document.getElementById('resetStatus'),sendReset=document.getElementById('sendReset');
         let resetBusy=false;
         document.getElementById('forgotPassword').addEventListener('click',()=>{
@@ -196,11 +196,13 @@
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = document.getElementById('adminEmail').value;
+            const email = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value;
             const errorMessage = document.getElementById('errorMessage');
 
-            const result = await loginAdmin(email, password);
+            const submit=e.currentTarget.querySelector('[type="submit"]');
+            if(submit.disabled)return;submit.disabled=true;errorMessage.style.display='none';
+            let result;try{result=await loginAdmin(email,password);}finally{submit.disabled=false;}
 
             if (result.success) {
                 // Firebase auth state persists automatically

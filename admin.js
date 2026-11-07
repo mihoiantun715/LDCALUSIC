@@ -2,7 +2,7 @@ import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from '.
 import {setTransportStatus,removeTransportBooking} from './route-store.js';
 import {createRoutePlanner} from './route-planner.js?v=driver-print-1';
 // Import Firebase auth functions
-import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js';
+import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=admin-access-2';
 
 let allBookings = [];
 let allUsers = [];

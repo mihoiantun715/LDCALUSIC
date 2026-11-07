@@ -1,3 +1,4 @@
+import { getDocFromServer } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { functions, httpsCallable } from './firebase-config.js';
 // Firebase Authentication Helper Functions
 import { 
@@ -199,7 +200,8 @@ export async function loginAdmin(email, password) {
         const user = userCredential.user;
         
         // Check if user is admin
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        await user.getIdToken(true);
+        const adminDoc = await getDocFromServer(doc(db, 'admins', user.uid));
         
         if (adminDoc.exists() && adminDoc.data().role === 'admin') {
             return {
@@ -220,12 +222,17 @@ export async function loginAdmin(email, password) {
         }
     } catch (error) {
         console.error('Admin login error:', error);
+        try { await signOut(auth); } catch {} 
         let message = 'Greška pri prijavi';
         
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        if (['auth/user-not-found','auth/wrong-password','auth/invalid-credential','auth/invalid-login-credentials'].includes(error.code)) {
             message = 'Neispravna email adresa ili lozinka';
         }
         
+        if(error.code==='permission-denied')message='Prijava je uspjela, ali provjera administratorskih prava je odbijena. Osvježite stranicu i pokušajte ponovno.';
+        if(error.code==='unavailable'||error.code==='auth/network-request-failed')message='Provjerite internetsku vezu i pokušajte ponovno.';
+        if(error.code==='auth/too-many-requests')message='Previše pokušaja prijave. Pričekajte nekoliko minuta i pokušajte ponovno.';
+
         return { success: false, message: message };
     }
 }
@@ -470,7 +477,8 @@ export async function checkIfAdmin() {
         const user = getCurrentUser();
         if (!user) return false;
         
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        await user.getIdToken(true);
+        const adminDoc = await getDocFromServer(doc(db, 'admins', user.uid));
         return adminDoc.exists() && adminDoc.data().role === 'admin';
     } catch (error) {
         console.error('Check admin error:', error);
