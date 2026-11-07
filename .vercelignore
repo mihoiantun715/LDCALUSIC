@@ -8,3 +8,11 @@ firestore.indexes.json
 .github/
 *.md
 !README.md
+
+data/
+functions/
+server.js
+work/
+outputs/
+*.code-workspace
+*.log

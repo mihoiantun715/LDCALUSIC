@@ -16,7 +16,16 @@
       "data/**",
       "package.json",
       "package-lock.json",
-      "README.md"
+      "README.md",
+      "functions/**",
+      "**/*.md",
+      "**/*.code-workspace",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "work/**",
+      "outputs/**",
+      "**/*.log",
+      "vercel.json"
     ],
     "rewrites": [
       {
