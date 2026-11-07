@@ -1,3 +1,4 @@
+import { functions, httpsCallable } from './firebase-config.js';
 // Firebase Authentication Helper Functions
 import { 
     auth, 
@@ -341,80 +342,8 @@ export async function createBooking(bookingData) {
 
 // Create public booking (for non-authenticated users)
 export async function createPublicBooking(bookingData) {
-    try {
-        const isTransport = (
-            bookingData.serviceCategory === 'transport' || 
-            bookingData.service === 'transport' || 
-            bookingData.service === 'vehicle_transport' ||
-            bookingData.service === 'Prijevoz i Dostava sa Instalacijom'
-        ) && bookingData.from && bookingData.to && bookingData.to.trim() !== '';
-        
-        if (isTransport) {
-            // Split into 2 bookings for transport: origin and destination
-            const baseBooking = {
-                ...bookingData,
-                status: 'pending',
-                createdAt: serverTimestamp(),
-                originalBookingId: null // Will be set after first booking is created
-            };
-            
-            // First booking: Origin (Polazište)
-            const originBooking = {
-                ...baseBooking,
-                bookingType: 'origin',
-                location: bookingData.from,
-                locationLabel: 'Polazište',
-                to: '', // Clear destination for origin booking
-                position: null // Position will be set by admin
-            };
-            
-            const originDocRef = await addDoc(collection(db, 'bookings'), originBooking);
-            
-            // Second booking: Destination (Odredište)
-            const destinationBooking = {
-                ...baseBooking,
-                bookingType: 'destination',
-                location: bookingData.to,
-                locationLabel: 'Odredište',
-                from: bookingData.to, // Set from to destination
-                to: '', // Clear to field
-                originalBookingId: originDocRef.id, // Link to origin booking
-                position: null
-            };
-            
-            const destDocRef = await addDoc(collection(db, 'bookings'), destinationBooking);
-            
-            // Update origin booking with link to destination
-            await updateDoc(doc(db, 'bookings', originDocRef.id), {
-                originalBookingId: destDocRef.id
-            });
-            
-            return {
-                success: true,
-                bookingId: originDocRef.id,
-                bookingIds: [originDocRef.id, destDocRef.id],
-                message: 'Kreirane 2 rezervacije: Polazište i Odredište'
-            };
-        } else {
-            // Regular booking for non-transport services
-            const booking = {
-                ...bookingData,
-                status: 'pending',
-                createdAt: serverTimestamp(),
-                position: null
-            };
-            
-            const docRef = await addDoc(collection(db, 'bookings'), booking);
-            
-            return {
-                success: true,
-                bookingId: docRef.id
-            };
-        }
-    } catch (error) {
-        console.error('Create public booking error:', error);
-        return { success: false, message: 'Greška pri slanju rezervacije' };
-    }
+ try {const response=await httpsCallable(functions,'submitPublicBooking')(bookingData);return response.data;}
+ catch(error){console.error('Create public booking error:',error);return {success:false,message:error.code==='functions/unavailable'?'Veza je prekinuta. Pokušajte ponovno; isti zahtjev neće se spremiti dvaput.':error.message||'Rezervacija nije poslana. Pokušajte ponovno.'};}
 }
 
 // Get user bookings

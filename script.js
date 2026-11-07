@@ -1,5 +1,5 @@
 // Import Firebase auth functions
-import { loginUser, registerUser, createPublicBooking, loginWithGoogle } from './firebase-auth.js';
+import { loginUser, registerUser, createPublicBooking, loginWithGoogle } from './firebase-auth.js?v=20261107-booking';
 import { functions, httpsCallable } from './firebase-config.js';
 
 // Smooth scroll navigation without hash
@@ -613,7 +613,8 @@ if (sendCodeBtn) {
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Šaljem...';
         
         // Send email (simulated for now)
-        await sendVerificationEmail(email, verificationCode);
+        const sent=await sendVerificationEmail(email, verificationCode);
+        if(!sent.success){verificationCode=null;isCodeVerified=false;this.disabled=false;this.textContent=translations[currentLang].verify_email;notify.error(sent.message||'Email nije poslan. Pokušajte ponovno.');return;}
         
         // Show verification code field
         document.getElementById('verificationCodeRow').style.display = 'grid';
@@ -799,9 +800,12 @@ if (phoneInput) {
     });
 }
 
+let publicBookingSubmitting=false;
+let publicBookingRequestId=crypto.randomUUID();
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    if(publicBookingSubmitting)return;
     const serviceType = document.getElementById('service').value;
     const isTransport = serviceType === 'transport';
     const phone = document.getElementById('phone').value;
@@ -844,13 +848,18 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         to: isTransport ? document.getElementById('to').value : '',
         date: document.getElementById('date').value,
         time: document.getElementById('time').value,
+        verificationCode,
+        requestId:publicBookingRequestId,
         message: document.getElementById('message').value
     };
     
-    const result = await createPublicBooking(formData);
+    publicBookingSubmitting=true;
+    const submitButton=e.currentTarget.querySelector('[type="submit"]');submitButton.disabled=true;
+    let result;try{result=await createPublicBooking(formData);}finally{publicBookingSubmitting=false;submitButton.disabled=false;}
     
     if (result.success) {
         notify.success(currentLang === 'hr' ? 'Rezervacija uspješno poslana! Kontaktirat ćemo vas uskoro.' : 'Booking sent successfully! We will contact you soon.');
+        publicBookingRequestId=crypto.randomUUID();
         document.getElementById('bookingForm').reset();
         transportLocationFields.style.display = 'grid';
         fixedLocationField.style.display = 'none';
