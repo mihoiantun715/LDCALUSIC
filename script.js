@@ -1,5 +1,5 @@
 // Import Firebase auth functions
-import { loginUser, registerUser, createPublicBooking, loginWithGoogle } from './firebase-auth.js?v=20261107-booking';
+import { loginUser, registerUser, createPublicBooking, loginWithGoogle, checkIfAdmin } from './firebase-auth.js?v=admin-access-2';
 import { functions, httpsCallable } from './firebase-config.js';
 
 // Smooth scroll navigation without hash
@@ -433,7 +433,7 @@ if (googleLoginBtn) {
         
         if (result.success) {
             loginModal.style.display = 'none';
-            window.location.href = 'dashboard.html';
+            window.location.href = await checkIfAdmin() ? 'admin.html' : 'dashboard.html';
         } else {
             if (result.message !== 'Prijava otkazana') {
                 notify.error(result.message);
@@ -449,7 +449,7 @@ if (googleRegisterBtn) {
         if (result.success) {
             registerModal.style.display = 'none';
             notify.success('Uspješna registracija sa Google!');
-            window.location.href = 'dashboard.html';
+            window.location.href = await checkIfAdmin() ? 'admin.html' : 'dashboard.html';
         } else {
             if (result.message !== 'Prijava otkazana') {
                 notify.error(result.message);
@@ -467,7 +467,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     
     if (result.success) {
         // Firebase auth state will persist automatically
-        window.location.href = 'dashboard.html';
+        window.location.href = await checkIfAdmin() ? 'admin.html' : 'dashboard.html';
     } else {
         notify.error(result.message || (currentLang === 'hr' ? 'Greška pri prijavi' : 'Login error'));
     }
