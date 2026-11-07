@@ -15,6 +15,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js?v=loading-1"></script>
 <link rel="stylesheet" href="auth-ui.css?v=1">
 <link rel="stylesheet" href="brand.css?v=1">
+<link rel="stylesheet" href="booking-form.css?v=1">
 </head>
 <body>
     <nav class="navbar">
@@ -130,36 +131,28 @@
         <div class="container">
             <h2 class="section-title" data-translate="booking_title">Rezervirajte uslugu</h2>
             <p class="section-subtitle" data-translate="booking_subtitle">Ispunite formu i kontaktirat ćemo vas u najkraćem roku</p>
-            <form class="booking-form" id="bookingForm">
-                <div class="form-row">
-                    <div class="form-group">
+<form class="booking-form booking-refined" id="bookingForm"><fieldset><legend data-ui-hr="Vaši kontakt podaci" data-ui-en="Your contact details">Vaši kontakt podaci</legend><div class="form-row"><div class="form-group">
                         <label for="name" data-translate="form_name">Ime i prezime</label>
                         <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
+                    </div><div class="form-group">
+                        <label for="phone" data-translate="form_phone">Telefon *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+385 91 234 5678" pattern="[0-9+\s\(\)\-]{7,20}">
+                    </div></div><div class="booking-email"><div class="form-group">
                         <label for="email" data-translate="form_email">Email</label>
                         <input type="email" id="email" name="email" required>
-                        <button type="button" class="verify-btn" id="sendCodeBtn" style="margin-top: 10px; padding: 8px 15px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                            <i class="fas fa-envelope"></i> <span data-translate="verify_email">Pošalji verifikacijski kod</span>
+                        <button type="button" class="verify-btn" id="sendCodeBtn">
+                            <span data-translate="verify_email">Pošalji verifikacijski kod</span>
                         </button>
-                    </div>
-                </div>
-                <div class="form-row" id="verificationCodeRow" style="display: none;">
+                    </div></div><div class="form-row" id="verificationCodeRow" style="display: none;">
                     <div class="form-group">
                         <label for="verificationCode" data-translate="verification_code">Verifikacijski kod</label>
                         <input type="text" id="verificationCode" name="verificationCode" placeholder="123456" maxlength="6" pattern="[0-9]{6}">
                         <button type="button" class="verify-btn" id="verifyCodeBtn" style="margin-top: 10px; padding: 8px 15px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                            <i class="fas fa-check"></i> <span data-translate="verify_code_btn">Potvrdi kod</span>
+                            <span data-translate="verify_code_btn">Potvrdi kod</span>
                         </button>
                         <small style="color: var(--text-light); margin-top: 5px; display: block;" data-translate="enter_code">Unesite 6-znamenkasti kod</small>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="phone" data-translate="form_phone">Telefon *</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="+385 91 234 5678" pattern="[0-9+\s\(\)\-]{7,20}">
-                    </div>
-                    <div class="form-group">
+                </div></fieldset><fieldset><legend data-ui-hr="Usluga i adresa" data-ui-en="Service and address">Usluga i adresa</legend><div class="booking-service"><div class="form-group">
                         <label for="service" data-translate="form_service">Vrsta usluge</label>
                         <select id="service" name="service" required>
                             <option value="" data-translate="form_select">Odaberite uslugu</option>
@@ -168,9 +161,7 @@
                             <option value="garden" data-translate="form_garden">Održavanje Zelenih Površina</option>
                             <option value="special" data-translate="form_special">Specijalne Usluge</option>
                         </select>
-                    </div>
-                </div>
-                <div class="form-row" id="transportLocationFields">
+                    </div></div><div class="form-row" id="transportLocationFields">
                     <div class="form-group">
                         <label for="from" data-translate="form_from">Polazište</label>
                         <input type="text" id="from" name="from">
@@ -195,22 +186,16 @@
                         <input type="text" id="location" name="location">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
+                </fieldset><fieldset><legend data-ui-hr="Željeni termin" data-ui-en="Preferred appointment">Željeni termin</legend><div class="form-row"><div class="form-group">
                         <label for="date" data-translate="form_date">Datum</label>
                         <input type="date" id="date" name="date" required>
-                    </div>
-                    <div class="form-group">
+                    </div><div class="form-group">
                         <label for="time" data-translate="form_time">Vrijeme</label>
                         <input type="time" id="time" name="time" required>
-                    </div>
-                </div>
-                <div class="form-group">
+                    </div></div><div class="form-group">
                     <label for="message" data-translate="form_message">Dodatne informacije</label>
                     <textarea id="message" name="message" rows="4"></textarea>
-                </div>
-                <button type="submit" class="submit-btn" data-translate="form_submit">Pošalji zahtjev</button>
-            </form>
+                </div></fieldset><div class="booking-submit"><p data-ui-hr="Termin potvrđujemo nakon dogovora s vama." data-ui-en="We will confirm the appointment with you.">Termin potvrđujemo nakon dogovora s vama.</p><button type="submit" class="submit-btn" data-translate="form_submit">Pošalji zahtjev</button></div></form>
         </div>
     </section>
 
@@ -342,7 +327,7 @@
     <script src="reviews.js?v=loading-1" defer></script><script src="auth-ui.js?v=loading-1" defer></script>
     <script type="module" src="firebase-config.js?v=loading-1"></script>
     <script type="module" src="auth-check.js?v=loading-1"></script>
-    <script type="module" src="script.js?v=clean-ui-1"></script>
+    <script type="module" src="script.js?v=booking-1"></script>
     <script>
         // Load Google Maps API after page loads
         function loadGoogleMaps() {

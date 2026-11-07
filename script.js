@@ -621,7 +621,7 @@ if (sendCodeBtn) {
         document.getElementById('verificationCode').required = true;
         
         // Update button
-        this.innerHTML = '<i class="fas fa-check"></i> ' + translations[currentLang].code_sent;
+        this.innerHTML = translations[currentLang].code_sent;
         this.style.background = '#28a745';
         
         notify.success(currentLang === 'hr' ? 
@@ -631,7 +631,7 @@ if (sendCodeBtn) {
         // Re-enable after 30 seconds
         setTimeout(() => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-envelope"></i> ' + translations[currentLang].verify_email;
+            this.innerHTML = translations[currentLang].verify_email;
             this.style.background = 'var(--primary-blue)';
         }, 30000);
     });
@@ -656,7 +656,7 @@ if (verifyCodeBtn) {
             isCodeVerified = true;
             codeInput.disabled = true;
             codeInput.style.borderColor = '#28a745';
-            this.innerHTML = '<i class="fas fa-check-circle"></i> ' + translations[currentLang].code_verified;
+            this.innerHTML = translations[currentLang].code_verified;
             this.style.background = '#28a745';
             this.disabled = true;
             notify.success(currentLang === 'hr' ? 'Kod uspješno potvrđen!' : 'Code verified successfully!');
@@ -873,11 +873,11 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         document.getElementById('verificationCode').disabled = false;
         document.getElementById('verificationCode').style.borderColor = '#e0e0e0';
         document.getElementById('sendCodeBtn').disabled = false;
-        document.getElementById('sendCodeBtn').innerHTML = '<i class="fas fa-envelope"></i> ' + translations[currentLang].verify_email;
+        document.getElementById('sendCodeBtn').innerHTML = translations[currentLang].verify_email;
         document.getElementById('sendCodeBtn').style.background = 'var(--primary-blue)';
         if (document.getElementById('verifyCodeBtn')) {
             document.getElementById('verifyCodeBtn').disabled = false;
-            document.getElementById('verifyCodeBtn').innerHTML = '<i class="fas fa-check"></i> ' + translations[currentLang].verify_code_btn;
+            document.getElementById('verifyCodeBtn').innerHTML = translations[currentLang].verify_code_btn;
             document.getElementById('verifyCodeBtn').style.background = 'var(--primary-blue)';
         }
         
