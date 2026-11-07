@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {addressFromPlace} from '../partner-addresses.mjs';
+const place={place_id:'id',formatted_address:'Savska 43, Slavonski Brod',geometry:{location:{}},address_components:['route','street_number','locality'].map(type=>({types:[type]}))};
+test('accepts full Google address but rejects street-only, partial and unresolved results',()=>{assert.equal(addressFromPlace(place).placeId,'id');assert.equal(addressFromPlace({...place,partial_match:true}),null);assert.equal(addressFromPlace({...place,address_components:[{types:['route']}]}),null);assert.equal(addressFromPlace({name:'unknown'}),null);});
