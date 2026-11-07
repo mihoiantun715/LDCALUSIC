@@ -226,6 +226,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const lang = btn.getAttribute('data-lang');
         translateDashboard(lang);
+        if(document.getElementById('my-bookings').classList.contains('active'))loadBookings();
     });
 });
 
@@ -256,7 +257,7 @@ window.initDashboardMap = function() {
         if (fromInput) {
             dashboardFromAutocomplete = new google.maps.places.Autocomplete(fromInput, {
                 types: ['address'],
-                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+                fields: ['formatted_address', 'geometry', 'name']
             });
             
             dashboardFromAutocomplete.addListener('place_changed', calculateDashboardDistance);
@@ -266,7 +267,7 @@ window.initDashboardMap = function() {
         if (toInput) {
             dashboardToAutocomplete = new google.maps.places.Autocomplete(toInput, {
                 types: ['address'],
-                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+                fields: ['formatted_address', 'geometry', 'name']
             });
             
             dashboardToAutocomplete.addListener('place_changed', calculateDashboardDistance);
@@ -276,7 +277,7 @@ window.initDashboardMap = function() {
         if (locationInput) {
             dashboardLocationAutocomplete = new google.maps.places.Autocomplete(locationInput, {
                 types: ['address'],
-                componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
+                fields: ['formatted_address', 'geometry', 'name']
             });
             console.log('✓ Dashboard Location input autocomplete initialized');
         }
@@ -333,6 +334,10 @@ checkAuthState(async (user) => {
     if (user) {
         currentUser = user;
         // Load user data from Firestore
+        document.getElementById('userName').textContent=user.displayName || user.email || 'Korisnik';
+        document.getElementById('profileName').textContent=user.displayName || '-';
+        document.getElementById('profileEmail').textContent=user.email || '-';
+        try {
         const { getDoc, doc, db } = await import('./firebase-config.js');
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         
@@ -340,9 +345,10 @@ checkAuthState(async (user) => {
             const userData = userDoc.data();
             document.getElementById('userName').textContent = userData.name;
             document.getElementById('profileName').textContent = userData.name;
-            document.getElementById('profileEmail').textContent = userData.email || '-';
+            document.getElementById('profileEmail').textContent = user.email || userData.email || '-';
             document.getElementById('profilePhone').textContent = userData.phone || '-';
         }
+        } catch { notify.error('Dodatni podaci profila trenutačno nisu dostupni.'); }
     } else {
         // Not authenticated, redirect to home
         window.location.href = 'index.html';
@@ -357,27 +363,15 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // Change email functionality
-document.getElementById('changeEmailBtn').addEventListener('click', () => {
-    notify.confirm(
-        'Unesite novu email adresu i trenutnu lozinku za potvrdu:',
-        'Promjena Email Adrese',
-        async () => {
-            const newEmail = prompt('Nova email adresa:');
-            if (!newEmail) return;
-            
-            const password = prompt('Trenutna lozinka za potvrdu:');
-            if (!password) return;
-            
-            const result = await updateUserEmail(newEmail, password);
-            
-            if (result.success) {
-                notify.success(result.message);
-                document.getElementById('profileEmail').textContent = newEmail;
-            } else {
-                notify.error(result.message);
-            }
-        }
-    );
+const emailDialog=document.getElementById('emailDialog');
+document.getElementById('changeEmailBtn').addEventListener('click',()=>emailDialog.showModal());
+document.getElementById('closeEmailDialog').addEventListener('click',()=>emailDialog.close());
+emailDialog.addEventListener('close',()=>document.getElementById('emailChangeForm').reset());
+document.getElementById('emailChangeForm').addEventListener('submit',async e=>{
+ e.preventDefault();const button=e.currentTarget.querySelector('[type="submit"]');if(button.disabled)return;button.disabled=true;
+ try{const result=await updateUserEmail(document.getElementById('newAccountEmail').value.trim(),document.getElementById('accountPassword').value);
+ if(result.success){document.getElementById('profileEmail').textContent=getCurrentUser().email;notify.success(result.message);emailDialog.close();}else notify.error(result.message);
+ }catch{notify.error('Promjena nije uspjela. Pokušajte ponovno.');}finally{button.disabled=false;}
 });
 
 // Change password functionality
@@ -438,6 +432,14 @@ document.querySelectorAll('.service-tab').forEach(tab => {
 });
 
 function toggleLocationFields(serviceType) {
+    document.querySelectorAll('.service-options').forEach(group => {
+        const active=group.id===serviceType+'Options';
+        group.querySelectorAll('input').forEach(input=>{input.disabled=!active;input.required=active;});
+    });
+    document.getElementById('dashboardDistanceDisplay').style.display='none';
+    const weight=document.getElementById('approxWeight');
+    weight.disabled=serviceType!=='transport';
+    weight.closest('.form-group').hidden=weight.disabled;
     const transportRow = document.getElementById('transportLocationRow');
     const fixedRow = document.getElementById('fixedLocationRow');
     const fromInput = document.getElementById('locationFrom');
@@ -448,21 +450,29 @@ function toggleLocationFields(serviceType) {
         transportRow.style.display = 'flex';
         fixedRow.style.display = 'none';
         fromInput.required = true;
+        toInput.required = true;
+        fromInput.disabled=false;toInput.disabled=false;fixedInput.disabled=true;
         fixedInput.required = false;
         fixedInput.value = '';
     } else {
         transportRow.style.display = 'none';
         fixedRow.style.display = 'flex';
         fromInput.required = false;
+        toInput.required = false;
+        fromInput.disabled=true;toInput.disabled=true;fixedInput.disabled=false;
         fixedInput.required = true;
         fromInput.value = '';
         toInput.value = '';
     }
 }
 
+let bookingSubmitting=false;
 document.getElementById('bookingFormDetailed').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    if (bookingSubmitting) return;
+    const requestedDate = new Date(document.getElementById('bookingDate').value+'T'+document.getElementById('bookingTime').value);
+    if (!Number.isFinite(requestedDate.getTime()) || requestedDate <= new Date()) {notify.warning(currentDashLang==='hr'?'Odaberite budući datum i vrijeme.':'Choose a future date and time.');return;}
     const activeTab = document.querySelector('.service-tab.active').getAttribute('data-service');
     let selectedService = '';
     let serviceCategory = '';
@@ -499,11 +509,15 @@ document.getElementById('bookingFormDetailed').addEventListener('submit', async 
         from: isTransport ? document.getElementById('locationFrom').value : document.getElementById('fixedLocation').value,
         to: isTransport ? document.getElementById('locationTo').value : '',
         serviceDescription: document.getElementById('serviceDescription').value,
-        approxWeight: document.getElementById('approxWeight').value,
+        approxWeight: isTransport ? document.getElementById('approxWeight').value : '',
         notes: document.getElementById('bookingNotes').value
     };
     
-    const result = await createBooking(bookingData);
+    bookingSubmitting=true;
+    const submit=e.currentTarget.querySelector('[type="submit"]');submit.disabled=true;
+    let result;
+    try {result=await createBooking(bookingData);} catch {result={success:false};}
+    finally {bookingSubmitting=false;submit.disabled=false;}
     
     if (result.success) {
         notify.success(currentDashLang === 'hr' ? 'Rezervacija uspješno poslana!' : 'Booking sent successfully!');
@@ -512,17 +526,21 @@ document.getElementById('bookingFormDetailed').addEventListener('submit', async 
         document.querySelector('.service-tab').classList.add('active');
         document.querySelectorAll('.service-options').forEach(opt => opt.style.display = 'none');
         document.getElementById('transportOptions').style.display = 'block';
+        toggleLocationFields('transport');
     } else {
         notify.error(result.message || (currentDashLang === 'hr' ? 'Greška pri slanju rezervacije' : 'Booking error'));
     }
 });
 
+function escapeHtml(value) {return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function loadBookings() {
-    const result = await getUserBookings();
+    document.getElementById('bookingsList').textContent=currentDashLang==='hr'?'Učitavanje rezervacija…':'Loading bookings…';
+    let result;
+    try {result=await getUserBookings();}catch{result={success:false,message:currentDashLang==='hr'?'Rezervacije se trenutačno ne mogu učitati. Pokušajte ponovno.':'Unable to load bookings. Please try again.'};}
     const bookingsList = document.getElementById('bookingsList');
     
     if (!result.success) {
-        bookingsList.innerHTML = `<p class="no-bookings">${result.message}</p>`;
+        bookingsList.innerHTML = `<p class="no-bookings">${escapeHtml(result.message)}</p>`;
         return;
     }
     
@@ -536,22 +554,22 @@ async function loadBookings() {
     bookingsList.innerHTML = bookings.map(booking => `
         <div class="booking-card">
             <div class="booking-header">
-                <h3>${getServiceName(booking.service || booking.serviceCategory)}</h3>
-                <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
+                <h3>${escapeHtml(getServiceName(booking.service || booking.serviceCategory))}</h3>
+                <span class="booking-status ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span>
             </div>
             <div class="booking-details">
                 <div class="booking-detail">
                     <i class="fas fa-calendar"></i>
-                    <span>${booking.date} ${booking.time || ''}</span>
+                    <span>${escapeHtml(booking.date)} ${escapeHtml(booking.time || '')}</span>
                 </div>
                 <div class="booking-detail">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>${booking.from} ${booking.to ? '→ ' + booking.to : ''}</span>
+                    <span>${escapeHtml(booking.from)} ${booking.to ? '→ ' + escapeHtml(booking.to) : ''}</span>
                 </div>
             </div>
-            ${booking.notes ? `<p style="margin-top: 15px; color: var(--text-light);"><strong>Napomena:</strong> ${booking.notes}</p>` : ''}
+            ${booking.notes ? `<p style="margin-top: 15px; color: var(--text-light);"><strong>Napomena:</strong> ${escapeHtml(booking.notes)}</p>` : ''}
             ${booking.status !== 'cancelled' && booking.status !== 'completed' ? `
-                <button class="cancel-booking-btn" data-booking-id="${booking.id}" style="margin-top: 15px; background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer;">
+                <button class="cancel-booking-btn" data-booking-id="${escapeHtml(booking.id)}" style="margin-top: 15px; background: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-times"></i> ${currentDashLang === 'hr' ? 'Otkaži Rezervaciju' : 'Cancel Booking'}
                 </button>
             ` : ''}
@@ -598,11 +616,13 @@ function getServiceName(service) {
         space_clearing: 'Pražnjenje prostora',
         waste_disposal: 'Odvoz otpada'
     };
-    return serviceNames[service] || service;
+    const option=[...document.querySelectorAll('.option-card input')].find(input=>input.value===service);
+    return option?.closest('.option-card').querySelector('h4')?.textContent || serviceNames[service] || service;
 }
 
 function getStatusText(status) {
     const statusTexts = {
+        cancelled: currentDashLang === 'hr' ? 'Otkazano' : 'Cancelled',
         pending: currentDashLang === 'hr' ? 'Na čekanju' : 'Pending',
         confirmed: currentDashLang === 'hr' ? 'Potvrđeno' : 'Confirmed',
         completed: currentDashLang === 'hr' ? 'Završeno' : 'Completed'
@@ -610,5 +630,10 @@ function getStatusText(status) {
     return statusTexts[status] || status;
 }
 
-const today = new Date().toISOString().split('T')[0];
+const localNow = new Date();
+const today = [localNow.getFullYear(),String(localNow.getMonth()+1).padStart(2,'0'),String(localNow.getDate()).padStart(2,'0')].join('-');
 document.getElementById('bookingDate').setAttribute('min', today);
+
+toggleLocationFields("transport");
+
+['locationFrom','locationTo'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{document.getElementById('dashboardDistanceDisplay').style.display='none';}));
