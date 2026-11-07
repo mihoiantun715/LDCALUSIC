@@ -1,6 +1,6 @@
 import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js';
-import {createRoutePlanner} from './route-planner.js';
+import {createRoutePlanner} from './route-planner.js?v=manual-order-2';
 // Import Firebase auth functions
 import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js';
 
