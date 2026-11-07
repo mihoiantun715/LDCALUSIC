@@ -1,4 +1,4 @@
-import {serviceCatalog} from './booking-details.mjs';
+import {serviceCatalog} from './booking-details.mjs?v=loading-1';
 export function driverJobDetails(job){
  const values=key=>[...new Set(job.docs.map(d=>String(d[key]??'').trim()).filter(Boolean))];
  return {phones:values('phone'),emails:values('email'),service:serviceCatalog[job.docs[0]?.service]?.name||job.docs[0]?.service||'Prijevoz',description:[...new Set([...values('serviceDescription'),...values('message')])].join('\n'),notes:values('notes').join('\n'),weight:values('approxWeight').map(v=>v+' kg').join(' / '),ids:job.docs.map(d=>d.id).join(', ')};

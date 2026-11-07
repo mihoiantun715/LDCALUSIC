@@ -1,6 +1,6 @@
 // Import Firebase auth functions
-import { loginUser, registerUser, createPublicBooking, loginWithGoogle, checkIfAdmin } from './firebase-auth.js?v=admin-access-2';
-import { functions, httpsCallable } from './firebase-config.js';
+import { loginUser, registerUser, createPublicBooking, loginWithGoogle, checkIfAdmin } from './firebase-auth.js?v=loading-1';
+import { functions, httpsCallable } from './firebase-config.js?v=loading-1';
 
 // Smooth scroll navigation without hash
 document.querySelectorAll('.nav-link, .cta-button').forEach(link => {

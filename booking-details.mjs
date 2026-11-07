@@ -142,7 +142,7 @@ export function describeBooking(booking,records){
  return {general:serviceCatalog[booking.service]?.description||'',custom:booking.serviceDescription?.trim()||booking.message?.trim()||mate?.serviceDescription?.trim()||mate?.message?.trim()||''};
 }
 const cache=new Map();
-export async function measureBookingRoute(route,maps=()=>globalThis.google?.maps){
+async function raw_measureBookingRoute(route,maps=()=>globalThis.google?.maps){
  const key=JSON.stringify([route.from,route.to]);if(cache.has(key))return cache.get(key);
  for(let i=0;i<40&&!maps()?.DirectionsService;i++)await new Promise(r=>setTimeout(r,250));
  const api=maps();if(!api?.DirectionsService)throw Error('Karta nije dostupna. Ponovno otvorite detalje za novi pokušaj.');
@@ -155,3 +155,5 @@ export async function measureBookingRoute(route,maps=()=>globalThis.google?.maps
   });
  });cache.set(key,result);return result;
 }
+
+export const measureBookingRoute=(...args)=>globalThis.appLoading?globalThis.appLoading.track(()=>raw_measureBookingRoute(...args),"Izračun udaljenosti…"):raw_measureBookingRoute(...args);

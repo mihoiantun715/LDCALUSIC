@@ -1,5 +1,5 @@
-import { getDocFromServer } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { functions, httpsCallable } from './firebase-config.js';
+import { getDocFromServer as rawGetDocFromServer } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { functions, httpsCallable } from './firebase-config.js?v=loading-1';
 // Firebase Authentication Helper Functions
 import { 
     auth, 
@@ -22,7 +22,7 @@ import {
     getDoc,
     GoogleAuthProvider,
     signInWithPopup
-} from './firebase-config.js';
+} from './firebase-config.js?v=loading-1';
 
 // Google Sign-In
 export async function signInWithGoogle() {
@@ -545,3 +545,5 @@ export async function sendPasswordReset(email) {
         return { success: false, message: message };
     }
 }
+
+const getDocFromServer=(...args)=>globalThis.appLoading?globalThis.appLoading.track(()=>rawGetDocFromServer(...args),'Provjera pristupa…'):rawGetDocFromServer(...args);

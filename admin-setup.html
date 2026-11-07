@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="hr">
 <head>
+<link rel="stylesheet" href="/loading.css?v=1"><script src="/loading.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Setup - LD ČALUŠIĆ</title>
@@ -128,9 +129,9 @@
         </div>
     </div>
 
-    <script src="notification.js?v=2"></script>
+    <script src="notification.js?v=loading-1"></script>
     <script type="module">
-        import { auth, db, createUserWithEmailAndPassword, doc, setDoc, collection, getDocs } from './firebase-config.js';
+        import { auth, db, createUserWithEmailAndPassword, doc, setDoc, collection, getDocs } from './firebase-config.js?v=loading-1';
 
         // Check if admin already exists
         async function checkAdminExists() {

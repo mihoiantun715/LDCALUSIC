@@ -1,4 +1,4 @@
-import {checkAuthState,checkIfAdmin,logoutUser} from './firebase-auth.js?v=admin-access-2';
+import {checkAuthState,checkIfAdmin,logoutUser} from './firebase-auth.js?v=loading-1';
 let revision=0;
 checkAuthState(async user=>{
  const version=++revision;

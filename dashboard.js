@@ -1,5 +1,5 @@
 // Import Firebase auth functions
-import { checkAuthState, getCurrentUser, createBooking, getUserBookings, cancelBooking, logoutUser, updateUserEmail, sendPasswordReset } from './firebase-auth.js';
+import { checkAuthState, getCurrentUser, createBooking, getUserBookings, cancelBooking, logoutUser, updateUserEmail, sendPasswordReset } from './firebase-auth.js?v=loading-1';
 
 // Google Maps variables for dashboard
 let dashboardFromAutocomplete, dashboardToAutocomplete, dashboardLocationAutocomplete;
@@ -338,7 +338,7 @@ checkAuthState(async (user) => {
         document.getElementById('profileName').textContent=user.displayName || '-';
         document.getElementById('profileEmail').textContent=user.email || '-';
         try {
-        const { getDoc, doc, db } = await import('./firebase-config.js');
+        const { getDoc, doc, db } = await import('./firebase-config.js?v=loading-1');
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         
         if (userDoc.exists()) {

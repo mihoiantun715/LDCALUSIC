@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="hr">
 <head>
+<link rel="stylesheet" href="/loading.css?v=1"><script src="/loading.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - LD ČALUŠIĆ</title>
@@ -174,7 +175,7 @@
         <p id="resetStatus" class="reset-status" role="status" aria-live="polite" hidden></p>
     </dialog>
     <script type="module">
-        import { loginAdmin, sendPasswordReset } from './firebase-auth.js?v=admin-access-2';
+        import { loginAdmin, sendPasswordReset } from './firebase-auth.js?v=loading-1';
         const resetDialog=document.getElementById('resetDialog'),resetEmail=document.getElementById('resetEmail'),resetStatus=document.getElementById('resetStatus'),sendReset=document.getElementById('sendReset');
         let resetBusy=false;
         document.getElementById('forgotPassword').addEventListener('click',()=>{

@@ -1,4 +1,4 @@
-import {auth,functions,httpsCallable,onAuthStateChanged} from './firebase-config.js';
+import {auth,functions,httpsCallable,onAuthStateChanged} from './firebase-config.js?v=loading-1';
 import {el,today} from './driver/ui.mjs';
 const $=id=>document.getElementById(id),api=httpsCallable(functions,'driverPortal');let revision=0,loading=false,candidates=[];
 const requestedDate=new URLSearchParams(location.search).get('date');

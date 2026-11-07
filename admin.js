@@ -1,10 +1,10 @@
 import {showDeliveryProof} from './delivery-proof-view.mjs';
-import { functions, httpsCallable } from './firebase-config.js';
-import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
-import {setTransportStatus,removeTransportBooking} from './route-store.js?v=tracking-1';
-import {createRoutePlanner} from './route-planner.js?v=driver-handoff-2';
+import { functions, httpsCallable } from './firebase-config.js?v=loading-1';
+import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs?v=loading-1';
+import {setTransportStatus,removeTransportBooking} from './route-store.js?v=loading-1';
+import {createRoutePlanner} from './route-planner.js?v=loading-1';
 // Import Firebase auth functions
-import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=admin-access-2';
+import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=loading-1';
 
 let allBookings = [];
 let allUsers = [];
@@ -188,7 +188,7 @@ async function displayUsers(users) {
     }
 
     // Get admin list
-    const { collection, getDocs, db } = await import('./firebase-config.js');
+    const { collection, getDocs, db } = await import('./firebase-config.js?v=loading-1');
     const adminsSnapshot = await getDocs(collection(db, 'admins'));
     const adminIds = new Set();
     adminsSnapshot.forEach(doc => adminIds.add(doc.id));
@@ -257,7 +257,7 @@ window.makeAdmin = async function(userId, email, name) {
     }
     
     try {
-        const { doc, setDoc, db } = await import('./firebase-config.js');
+        const { doc, setDoc, db } = await import('./firebase-config.js?v=loading-1');
         await setDoc(doc(db, 'admins', userId), {
             role: 'admin',
             email: email,
@@ -279,7 +279,7 @@ window.removeAdmin = async function(userId) {
     }
     
     try {
-        const { doc, deleteDoc, db } = await import('./firebase-config.js');
+        const { doc, deleteDoc, db } = await import('./firebase-config.js?v=loading-1');
         await deleteDoc(doc(db, 'admins', userId));
         
         notify.success('Admin privileges removed');
@@ -296,7 +296,7 @@ window.deleteUser = async function(userId, userName) {
     }
     
     try {
-        const { doc, deleteDoc, collection, query, where, getDocs, db } = await import('./firebase-config.js');
+        const { doc, deleteDoc, collection, query, where, getDocs, db } = await import('./firebase-config.js?v=loading-1');
         
         // Delete user's bookings first
         const bookingsQuery = query(collection(db, 'bookings'), where('userId', '==', userId));
@@ -510,7 +510,7 @@ async function acceptBooking() {
     }
     
     try {
-        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        const { doc, updateDoc, db } = await import('./firebase-config.js?v=loading-1');
         
         await setTransportStatus(currentBookingId, {
             status: 'confirmed'
@@ -534,7 +534,7 @@ async function denyBooking() {
     if (!reason) return;
     
     try {
-        const { doc, updateDoc, db } = await import('./firebase-config.js');
+        const { doc, updateDoc, db } = await import('./firebase-config.js?v=loading-1');
         
         await setTransportStatus(currentBookingId, {
             status: 'cancelled',
@@ -594,7 +594,7 @@ async function deleteBookingConfirm() {
 
 async function deleteBookingById(bookingId) {
     try {
-        const { deleteBooking } = await import('./firebase-auth.js');
+        const { deleteBooking } = await import('./firebase-auth.js?v=loading-1');
         await removeTransportBooking(bookingId);
         const result = {success:true};
 

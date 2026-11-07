@@ -1,8 +1,8 @@
 import {showDeliveryProof} from './delivery-proof-view.mjs';
 import {createPartnerWorkspace} from './partner-workspace.mjs?v=3';
-import {attachAddressChecks} from './partner-addresses.mjs';
-import {auth,functions,httpsCallable,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from './firebase-config.js';
-import {sendPasswordReset} from './firebase-auth.js';
+import {attachAddressChecks} from './partner-addresses.mjs?v=loading-1';
+import {auth,functions,httpsCallable,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from './firebase-config.js?v=loading-1';
+import {sendPasswordReset} from './firebase-auth.js?v=loading-1';
 const api=httpsCallable(functions,'partnerPortal'),$=id=>document.getElementById(id);let registering=false,requestId=crypto.randomUUID(),epoch=0;
 const workspace=createPartnerWorkspace({openProof:id=>showDeliveryProof(httpsCallable(functions,'driverPortal'),id)});
 const message=text=>{const el=$('feedback');el.hidden=false;el.textContent=text;};

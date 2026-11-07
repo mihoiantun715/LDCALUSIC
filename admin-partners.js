@@ -1,4 +1,4 @@
-import {auth,onAuthStateChanged,functions,httpsCallable} from './firebase-config.js';
+import {auth,onAuthStateChanged,functions,httpsCallable} from './firebase-config.js?v=loading-1';
 export function mountPartnerManagement(api){
  const $=id=>document.getElementById(id),host=$('members'),msg=$('message'),dialog=$('editDialog'),form=$('editForm');let members=[],busy=false,editing=null,loaded=false;
  const status=m=>m.deleted?'deleted':m.active?'active':m.approvedBy?'inactive':'pending';const labels={active:'Aktivan pristup',pending:'Čeka odobrenje',inactive:'Deaktiviran',deleted:'Obrisan pristup'};
