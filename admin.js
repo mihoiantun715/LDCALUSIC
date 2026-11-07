@@ -1,7 +1,7 @@
 import { functions, httpsCallable } from './firebase-config.js';
 import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js?v=tracking-1';
-import {createRoutePlanner} from './route-planner.js?v=tracking-1';
+import {createRoutePlanner} from './route-planner.js?v=driver-handoff-1';
 // Import Firebase auth functions
 import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=admin-access-2';
 
@@ -33,7 +33,7 @@ document.getElementById('adminLogoutBtn').addEventListener('click', async () => 
     }
 });
 
-document.querySelectorAll('.sidebar-item').forEach(item => {
+document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
         const section = item.getAttribute('data-section');
