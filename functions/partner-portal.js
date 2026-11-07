@@ -26,21 +26,29 @@ function createPartnerHandler({admin,functions}){return async(data,context)=>{
  }
  if(action==='profile'){const snap=await memberRef.get();return {profile:snap.exists?{...snap.data(),id:uid}:null};}
  if(action==='members'){await requireAdmin();const docs=await db.collection('partners').get();return {members:docs.docs.map(d=>({...d.data(),id:d.id}))};}
+ if(['editMember','removeMember','restoreMember'].includes(action)){
+ await requireAdmin();if(typeof data.uid!=='string'||!data.uid||data.uid.includes('/'))fail('invalid-argument','Neispravan korisnik.');
+ const ref=db.collection('partners').doc(data.uid);
+ let patch;
+ if(action==='editMember'){const name=text(data.name,120),store=text(data.store,180),phone=text(data.phone,40);if(!name||!store||!/^\+?[\d\s()-]{7,40}$/.test(phone))fail('invalid-argument','Unesite ime, poslovnicu i valjan telefon.');patch={name,store,phone};}
+ else patch=action==='removeMember'?{deleted:true,active:false,deletedAt:stamp()}:{deleted:false,active:false};
+ await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(!snap.exists)fail('not-found','Suradnik nije pronađen.');if(action==='editMember'&&snap.data().deleted)fail('failed-precondition','Najprije vratite suradnika.');tx.update(ref,{...patch,updatedAt:stamp(),updatedBy:uid});});return {success:true};
+ }
  if(action==='access'){
  await requireAdmin();if(typeof data.active!=='boolean'||typeof data.uid!=='string')fail('invalid-argument','Neispravan zahtjev.');
- const target=db.collection('partners').doc(data.uid);await db.runTransaction(async tx=>{const snap=await tx.get(target);if(!snap.exists)fail('not-found','Zahtjev nije pronađen.');tx.update(target,{active:data.active,approvedBy:uid,updatedAt:stamp()});});return {success:true};
+ const target=db.collection('partners').doc(data.uid);await db.runTransaction(async tx=>{const snap=await tx.get(target);if(!snap.exists)fail('not-found','Zahtjev nije pronađen.');if(snap.data().deleted)fail('failed-precondition','Najprije vratite obrisani pristup.');tx.update(target,{active:data.active,approvedBy:uid,updatedAt:stamp()});});return {success:true};
  }
  if(action==='schedule'){
  await requireAdmin();const date=text(data.date,10),time=text(data.time,5);try{validateDate(date,time);if(!date)throw Error('Odaberite datum.');}catch(e){fail('invalid-argument',e.message);}
  const ref=db.collection('bookings').doc(text(data.id,128));await db.runTransaction(async tx=>{const snap=await tx.get(ref),b=snap.data();if(!b||b.source!=='partner')fail('not-found','Partnerski zahtjev nije pronađen.');if(['cancelled','completed'].includes(b.status))fail('failed-precondition','Zatvoren zahtjev ne može se rasporediti.');tx.update(ref,{date,time,position:null,routePlanDate:null,routeDriver:null,scheduledBy:uid,updatedAt:stamp()});});return {success:true};
  }
- const member=await memberRef.get();if(!member.exists||!member.data().active||member.data().companyId!=='jysk')fail('permission-denied','Pristup još nije odobren ili je deaktiviran.');
+ const member=await memberRef.get();if(!member.exists||!member.data().active||member.data().deleted||member.data().companyId!=='jysk')fail('permission-denied','Pristup još nije odobren ili je deaktiviran.');
  if(action==='orders'){const docs=await db.collection('bookings').where('partnerUserId','==',uid).get();return {orders:docs.docs.map(d=>{const b=d.data();return {id:d.id,name:b.name,phone:b.phone,from:b.from,to:b.to,orderNumber:b.orderNumber,status:b.status,date:b.date,time:b.time,requestedDate:b.requestedDate,requestedTime:b.requestedTime,appointmentType:b.appointmentType,createdAt:b.createdAt?.toMillis()||0};}).sort((a,b)=>b.createdAt-a.createdAt)};}
  if(action==='submit'){
  let b;try{b=validatePartnerOrder(data);}catch(e){fail('invalid-argument',e.message);}
  if(!/^[a-zA-Z0-9-]{20,64}$/.test(data.requestId||''))fail('invalid-argument','Osvježite obrazac.');
  const ref=db.collection('bookings').doc('partner_'+uid+'_'+data.requestId);
- await db.runTransaction(async tx=>{const access=await tx.get(memberRef),existing=await tx.get(ref);if(!access.data()?.active)fail('permission-denied','Pristup je deaktiviran.');if(existing.exists)return;const m=access.data();tx.set(ref,{...b,source:'partner',partnerId:'jysk',partnerName:'JYSK Hrvatska',partnerUserId:uid,partnerStore:m.store,partnerContact:m.name,partnerPhone:m.phone,partnerEmail:m.email,userId:null,service:'furniture_appliances',serviceCategory:'transport',status:'pending',date:b.appointmentType==='agreed'?b.requestedDate:'',time:b.appointmentType==='agreed'?b.requestedTime:'',position:null,createdAt:stamp()});});return {success:true,id:ref.id};
+ await db.runTransaction(async tx=>{const access=await tx.get(memberRef),existing=await tx.get(ref);if(!access.data()?.active||access.data()?.deleted)fail('permission-denied','Pristup je deaktiviran.');if(existing.exists)return;const m=access.data();tx.set(ref,{...b,source:'partner',partnerId:'jysk',partnerName:'JYSK Hrvatska',partnerUserId:uid,partnerStore:m.store,partnerContact:m.name,partnerPhone:m.phone,partnerEmail:m.email,userId:null,service:'furniture_appliances',serviceCategory:'transport',status:'pending',date:b.appointmentType==='agreed'?b.requestedDate:'',time:b.appointmentType==='agreed'?b.requestedTime:'',position:null,createdAt:stamp()});});return {success:true,id:ref.id};
  }
  fail('invalid-argument','Nepoznata radnja.');
 };}
