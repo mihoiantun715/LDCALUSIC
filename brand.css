@@ -1,0 +1,3 @@
+.navbar .logo{flex-shrink:0}.navbar .brand-logo-link{display:flex;align-items:center;text-decoration:none}.navbar .brand-logo-image{display:block;width:220px;height:auto;max-height:66px;object-fit:contain;filter:none;border-radius:0;box-shadow:none}.sidebar-help a{white-space:nowrap;font-size:15px}.sidebar-help small{display:block;margin-top:8px}
+@media(max-width:768px){.navbar .brand-logo-image{width:155px;max-height:48px}.navbar .logo{min-width:0}.navbar .nav-container{gap:10px}.navbar .nav-actions{gap:6px}}
+@media(max-width:380px){.navbar .brand-logo-image{width:130px}}
