@@ -42,11 +42,12 @@ service cloud.firestore {
       
       // Authenticated users can create bookings
       allow create: if isAuthenticated() && 
-                       request.resource.data.userId == request.auth.uid;
+                       request.resource.data.userId == request.auth.uid &&
+                       !request.resource.data.keys().hasAny(['routeDriver','routePlanDate','etaAt','driverUpdatedBy','completedAt']);
       
       // Users can update their own bookings (to cancel), admins can update all
       allow update: if isAuthenticated() && 
-                       (resource.data.userId == request.auth.uid || isAdmin());
+                       (isAdmin() || (resource.data.get('userId', null) == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt']) && request.resource.data.status == 'cancelled'));
       
       // Only admins can delete bookings
       allow delete: if isAdmin();

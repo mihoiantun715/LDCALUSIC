@@ -116,3 +116,5 @@ exports.submitPublicBooking = functions.https.onCall(async (data,context)=>{
 });
 
 exports.partnerPortal = functions.https.onCall(require('./partner-portal').createPartnerHandler({admin,functions}));
+
+exports.driverPortal = functions.https.onCall(require('./driver-portal').createDriverHandler({admin,functions}));
