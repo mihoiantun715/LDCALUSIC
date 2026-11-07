@@ -114,6 +114,14 @@
             margin-bottom: 20px;
             display: none;
         }
+        .reset-link{display:block;margin:18px auto 0;border:0;background:transparent;color:#175ec8;font:inherit;cursor:pointer;text-decoration:underline}
+        .reset-dialog{width:min(440px,calc(100% - 32px));border:1px solid #d5e2f2;border-radius:20px;padding:30px;color:#173757;margin:auto;box-shadow:0 24px 70px #102e5040}
+        .reset-dialog::backdrop{background:#102e5080;backdrop-filter:blur(3px)}
+        .reset-dialog h2{margin:0 0 12px}.reset-dialog p{margin:0 0 22px;line-height:1.6}
+        .reset-close{float:right;border:0;background:#edf4ff;color:#173757;border-radius:50%;width:32px;height:32px;font-size:23px;cursor:pointer}
+        .reset-status{margin-top:16px!important;padding:12px;border-radius:10px;background:#edf4ff;overflow-wrap:anywhere}
+        button:disabled{opacity:.6;cursor:wait}.reset-dialog button:focus-visible,.reset-link:focus-visible{outline:3px solid #65a4ff;outline-offset:3px}
+        @media(max-width:480px){.admin-login-container{padding:28px}.reset-dialog{padding:24px}}
     </style>
 </head>
 <body>
@@ -146,6 +154,8 @@
             </button>
         </form>
 
+        <button type="button" class="reset-link" id="forgotPassword">Zaboravljena lozinka?</button>
+
         <div class="back-link">
             <a href="index.html">
                 <i class="fas fa-arrow-left"></i> Povratak na početnu
@@ -153,8 +163,35 @@
         </div>
     </div>
 
+    <dialog id="resetDialog" class="reset-dialog" aria-labelledby="resetTitle" aria-describedby="resetHelp">
+        <button type="button" class="reset-close" id="closeReset" aria-label="Zatvori">×</button>
+        <h2 id="resetTitle">Nova lozinka</h2>
+        <p id="resetHelp">Unesite email svojeg administratorskog računa. Poslat ćemo vam poveznicu za postavljanje nove lozinke.</p>
+        <form id="adminResetForm">
+            <div class="admin-form-group"><label for="resetEmail">Email računa</label><input id="resetEmail" type="email" autocomplete="email" required maxlength="254" placeholder="Unesite email adresu"></div>
+            <button type="submit" class="admin-login-btn" id="sendReset">Pošalji poveznicu</button>
+        </form>
+        <p id="resetStatus" class="reset-status" role="status" aria-live="polite" hidden></p>
+    </dialog>
     <script type="module">
-        import { loginAdmin } from './firebase-auth.js';
+        import { loginAdmin, sendPasswordReset } from './firebase-auth.js';
+        const resetDialog=document.getElementById('resetDialog'),resetEmail=document.getElementById('resetEmail'),resetStatus=document.getElementById('resetStatus'),sendReset=document.getElementById('sendReset');
+        let resetBusy=false;
+        document.getElementById('forgotPassword').addEventListener('click',()=>{
+            if(!resetBusy){resetEmail.value=document.getElementById('adminEmail').value.trim();resetStatus.hidden=true;}
+            resetDialog.showModal();resetEmail.focus();
+        });
+        document.getElementById('closeReset').addEventListener('click',()=>resetDialog.close());
+        document.getElementById('adminResetForm').addEventListener('submit',async e=>{
+            e.preventDefault();if(resetBusy)return;
+            resetEmail.value=resetEmail.value.trim();if(!resetEmail.reportValidity())return;
+            resetBusy=true;sendReset.disabled=true;resetEmail.disabled=true;sendReset.textContent='Šaljem…';resetStatus.hidden=true;
+            try{
+                const result=await sendPasswordReset(resetEmail.value);
+                resetStatus.textContent=result.success?'Ako račun postoji za navedeni email, poslana je poveznica za novu lozinku. Provjerite pristiglu poštu i neželjenu poštu.':result.message||'Slanje nije uspjelo. Pokušajte ponovno.';
+            }catch{resetStatus.textContent='Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovno.';}
+            finally{resetStatus.hidden=false;resetBusy=false;sendReset.disabled=false;resetEmail.disabled=false;sendReset.textContent='Pošalji poveznicu';}
+        });
         
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
