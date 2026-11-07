@@ -1,5 +1,5 @@
 // Pure planning rules. A transport job is indivisible: pickup always precedes delivery.
-const transportCodes=new Set(['transport','vehicle_transport','furniture_appliances','general_cargo','cargo','installation','furniture_assembly','fitness_equipment','general_transport','moving','space_clearing','waste_disposal','Prijevoz i Dostava sa Instalacijom']);
+const transportCodes=new Set(['fitness','moving_eu','clearing','waste','transport','vehicle_transport','furniture_appliances','general_cargo','cargo','installation','furniture_assembly','fitness_equipment','general_transport','moving','space_clearing','waste_disposal','Prijevoz i Dostava sa Instalacijom']);
 export const position=b=>Number.isInteger(b.position)&&b.position>=0?b.position:Number.MAX_SAFE_INTEGER;
 export const signature=b=>JSON.stringify(['date','time','status','from','to','location','bookingType','originalBookingId','position','routeDriver','routePlanDate'].map(k=>b[k]??null));
 export function buildJobs(records,date,status='all'){

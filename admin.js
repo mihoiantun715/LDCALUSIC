@@ -1,3 +1,4 @@
+import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js';
 import {createRoutePlanner} from './route-planner.js';
 // Import Firebase auth functions
@@ -121,7 +122,7 @@ function displayBookings(bookings) {
             <td>${escapeHtml(booking.serviceDescription || '-')}</td>
             <td><span class="status-badge ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span></td>
             <td>
-                <button aria-label="Prikaži detalje" class="action-btn btn-view" onclick="viewBooking('${booking.id}')">
+                <button aria-label="Prikaži detalje" class="action-btn btn-view" onclick="viewBooking('${escapeHtml(booking.id)}')">
                     <i class="fas fa-eye"></i>
                 </button>
                 <button aria-label="Obriši" class="action-btn btn-delete" onclick="confirmDeleteBooking('${booking.id}')">
@@ -380,13 +381,16 @@ function getServiceNameCroatian(service) {
         waste_disposal: 'Odvoz otpada',
         transport: 'Prijevoz i dostava'
     };
-    return serviceNames[service] || service || 'Transport';
+    return serviceCatalog[service]?.name || serviceNames[service] || service || 'Transport';
 }
 
 window.viewBooking = function(bookingId) {
     const booking = allBookings.find(b => b.id === bookingId) || routePlanner.records().find(b => b.id === bookingId);
     if (!booking) return;
 
+    const records=[...allBookings,...routePlanner.records()];
+    const route=bookingRoute(booking,records);
+    const description=describeBooking(booking,records);
     currentBookingId = bookingId;
     const modal = document.getElementById('bookingModal');
     const details = document.getElementById('bookingDetails');
@@ -422,19 +426,19 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Lokacija:</div>
-            <div class="detail-value">${escapeHtml(booking.location || booking.from)}${escapeHtml(booking.to ? ' → ' + booking.to : '')}</div>
+            <div class="detail-value">${escapeHtml(route?.to ? route.from+' → '+route.to : booking.location || booking.from || 'Nije navedena')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Udaljenost:</div>
-            <div class="detail-value">${escapeHtml(booking.distance || '-')}</div>
+            <div class="detail-value" id="bookingRouteDistance" aria-live="polite">${route?.to ? 'Izračunavam…' : 'Nije primjenjivo — nema potpune relacije'}</div>
         </div>
         <div class="detail-row">
-            <div class="detail-label">Trajanje:</div>
-            <div class="detail-value">${escapeHtml(booking.duration || '-')}</div>
+            <div class="detail-label">Procjena vožnje:</div>
+            <div class="detail-value" id="bookingRouteDuration" aria-live="polite">${route?.to ? 'Izračunavam…' : 'Nije primjenjivo'}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Opis Usluge:</div>
-            <div class="detail-value">${escapeHtml(booking.serviceDescription || booking.message || '-')}</div>
+            <div class="detail-value">${escapeHtml(description.general)}${description.custom ? '<br><strong>Zahtjev klijenta:</strong><br>'+escapeHtml(description.custom) : '<br>Klijent nije naveo dodatni opis.'}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Približna Težina:</div>
@@ -453,6 +457,17 @@ window.viewBooking = function(bookingId) {
             <div class="detail-value">${escapeHtml(formatDate(booking.createdAt))}</div>
         </div>
     `;
+
+    if(route?.to){
+        const distanceEl=details.querySelector('#bookingRouteDistance');
+        const durationEl=details.querySelector('#bookingRouteDuration');
+        measureBookingRoute(route).then(result=>{
+            if(!distanceEl.isConnected)return;
+            distanceEl.textContent=(result.meters/1000).toLocaleString('hr-HR',{maximumFractionDigits:1})+' km';
+            const minutes=Math.ceil(result.seconds/60);
+            durationEl.textContent=(minutes>=60?Math.floor(minutes/60)+' h ':'')+(minutes%60)+' min — bez utovara, istovara i zadržavanja';
+        }).catch(error=>{if(distanceEl.isConnected){distanceEl.textContent=error.message;durationEl.textContent='Procjena nije dostupna';}});
+    }
 
     // Show Accept/Deny buttons only for pending bookings
     const modalActions = document.getElementById('modalActions');
