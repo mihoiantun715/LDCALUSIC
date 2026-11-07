@@ -1,9 +1,10 @@
-import {createPartnerWorkspace} from './partner-workspace.mjs?v=2';
+import {showDeliveryProof} from './delivery-proof-view.mjs';
+import {createPartnerWorkspace} from './partner-workspace.mjs?v=3';
 import {attachAddressChecks} from './partner-addresses.mjs';
 import {auth,functions,httpsCallable,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from './firebase-config.js';
 import {sendPasswordReset} from './firebase-auth.js';
 const api=httpsCallable(functions,'partnerPortal'),$=id=>document.getElementById(id);let registering=false,requestId=crypto.randomUUID(),epoch=0;
-const workspace=createPartnerWorkspace();
+const workspace=createPartnerWorkspace({openProof:id=>showDeliveryProof(httpsCallable(functions,'driverPortal'),id)});
 const message=text=>{const el=$('feedback');el.hidden=false;el.textContent=text;};
 const errors=e=>({'auth/invalid-credential':'Email ili lozinka nisu ispravni.','auth/email-already-in-use':'Račun već postoji. Prijavite se ili resetirajte lozinku.','auth/weak-password':'Odaberite jaču lozinku.','auth/too-many-requests':'Previše pokušaja. Pričekajte pa pokušajte ponovno.'}[e.code]||e.message||'Zahtjev nije uspio.');
 async function run(form,task){const b=form.querySelector('button[type="submit"],button.primary');if(b.disabled)return;b.disabled=true;try{await task();}catch(e){message(errors(e));}finally{b.disabled=false;}}

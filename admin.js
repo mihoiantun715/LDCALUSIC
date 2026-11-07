@@ -1,3 +1,4 @@
+import {showDeliveryProof} from './delivery-proof-view.mjs';
 import { functions, httpsCallable } from './firebase-config.js';
 import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js?v=tracking-1';
@@ -471,6 +472,7 @@ window.viewBooking = function(bookingId) {
         }).catch(error=>{if(distanceEl.isConnected){distanceEl.textContent=error.message;durationEl.textContent='Procjena nije dostupna';}});
     }
 
+    if(booking.hasProof){const button=document.createElement('button');button.className='btn-primary';button.textContent='Potvrda uručenja';button.onclick=()=>showDeliveryProof(httpsCallable(functions,'driverPortal'),booking.id);details.append(button);}
     if(booking.handlingSummary){const row=document.createElement('div');row.className='detail-row';const label=document.createElement('strong');label.textContent='Uvjeti dostave:';const value=document.createElement('div');value.textContent=booking.handlingSummary;value.style.whiteSpace='pre-line';row.append(label,value);details.append(row);}
     if(booking.source==='partner'){
         const box=document.createElement('section');box.className='planner-issue';
