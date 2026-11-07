@@ -793,10 +793,7 @@ body {
     gap: 8px;
 }
 
-.requirement-title::before {
-    content: "🔒";
-    font-size: 16px;
-}
+
 
 .requirements-list {
     list-style: none;

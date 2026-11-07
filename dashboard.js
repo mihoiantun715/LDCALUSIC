@@ -261,7 +261,7 @@ window.initDashboardMap = function() {
             });
             
             dashboardFromAutocomplete.addListener('place_changed', calculateDashboardDistance);
-            console.log('✓ Dashboard From input autocomplete initialized');
+            console.log('Dashboard From input autocomplete initialized');
         }
         
         if (toInput) {
@@ -271,7 +271,7 @@ window.initDashboardMap = function() {
             });
             
             dashboardToAutocomplete.addListener('place_changed', calculateDashboardDistance);
-            console.log('✓ Dashboard To input autocomplete initialized');
+            console.log('Dashboard To input autocomplete initialized');
         }
         
         if (locationInput) {
@@ -279,13 +279,13 @@ window.initDashboardMap = function() {
                 types: ['address'],
                 fields: ['formatted_address', 'geometry', 'name']
             });
-            console.log('✓ Dashboard Location input autocomplete initialized');
+            console.log('Dashboard Location input autocomplete initialized');
         }
         
         dashboardMapsInitialized = true;
-        console.log('✅ Dashboard Google Maps initialization complete!');
+        console.log('Dashboard Google Maps initialization complete!');
     } catch (error) {
-        console.error('❌ Error initializing dashboard Google Maps:', error);
+        console.error('Error initializing dashboard Google Maps:', error);
     }
 };
 
@@ -319,7 +319,7 @@ function calculateDashboardDistance() {
             if (distanceValue) distanceValue.textContent = distanceInKm;
             if (distanceDisplay) distanceDisplay.style.display = 'flex';
             
-            console.log('✓ Dashboard distance calculated:', distanceInKm, 'km');
+            console.log('Dashboard distance calculated:', distanceInKm, 'km');
         } else {
             console.log('Distance calculation failed:', status);
             if (distanceDisplay) distanceDisplay.style.display = 'none';
@@ -564,7 +564,7 @@ async function loadBookings() {
                 </div>
                 <div class="booking-detail">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>${escapeHtml(booking.from)} ${booking.to ? '→ ' + escapeHtml(booking.to) : ''}</span>
+                    <span>${escapeHtml(booking.from)} ${booking.to ? '– ' + escapeHtml(booking.to) : ''}</span>
                 </div>
             </div>
             ${booking.notes ? `<p style="margin-top: 15px; color: var(--text-light);"><strong>Napomena:</strong> ${escapeHtml(booking.notes)}</p>` : ''}

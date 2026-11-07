@@ -705,7 +705,7 @@ window.initMap = function() {
             });
             
             fromAutocomplete.addListener('place_changed', calculateDistance);
-            console.log('✓ From input autocomplete initialized');
+            console.log('From input autocomplete initialized');
         }
         
         if (toInput) {
@@ -715,7 +715,7 @@ window.initMap = function() {
             });
             
             toAutocomplete.addListener('place_changed', calculateDistance);
-            console.log('✓ To input autocomplete initialized');
+            console.log('To input autocomplete initialized');
         }
         
         if (locationInput) {
@@ -723,13 +723,13 @@ window.initMap = function() {
                 types: ['address'],
                 componentRestrictions: { country: ['hr', 'rs', 'ba', 'si', 'hu', 'at', 'de', 'it'] }
             });
-            console.log('✓ Location input autocomplete initialized');
+            console.log('Location input autocomplete initialized');
         }
         
         mapsInitialized = true;
-        console.log('✅ Google Maps initialization complete!');
+        console.log('Google Maps initialization complete!');
     } catch (error) {
-        console.error('❌ Error initializing Google Maps:', error);
+        console.error('Error initializing Google Maps:', error);
     }
 };
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Setup - LD ČALUŠIĆ</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=clean-ui-1">
     <link rel="stylesheet" href="notification.css?v=2">
     <style>
         .setup-container {
@@ -95,12 +95,12 @@
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1>🔐 Admin Setup</h1>
+            <h1>Admin Setup</h1>
             <p>Create the first admin account for your system</p>
         </div>
 
         <div class="warning-box">
-            <p><strong>⚠️ Important:</strong> This page should only be used ONCE to create the first admin account. After setup, this page will be disabled.</p>
+            <p><strong>Important:</strong> This page should only be used ONCE to create the first admin account. After setup, this page will be disabled.</p>
         </div>
 
         <form class="setup-form" id="adminSetupForm">
@@ -125,7 +125,7 @@
         </form>
 
         <div class="success-box" id="successBox">
-            <p><strong>✅ Success!</strong> Admin account created. You can now login at <a href="admin-login.html">admin-login.html</a></p>
+            <p><strong>Success!</strong> Admin account created. You can now login at <a href="admin-login.html">admin-login.html</a></p>
         </div>
     </div>
 
@@ -151,7 +151,7 @@
             if (adminExists) {
                 document.querySelector('.setup-container').innerHTML = `
                     <div class="setup-header">
-                        <h1>🔒 Setup Complete</h1>
+                        <h1>Setup Complete</h1>
                         <p>Admin account already exists. This page is now disabled.</p>
                         <a href="admin-login.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--primary-blue); color: white; text-decoration: none; border-radius: 5px;">Go to Admin Login</a>
                     </div>

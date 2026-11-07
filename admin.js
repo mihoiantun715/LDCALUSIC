@@ -120,7 +120,7 @@ function displayBookings(bookings) {
             <td>${escapeHtml(getUserName(booking.userId))}</td>
             <td>${escapeHtml(getServiceName(booking.serviceCategory))}</td>
             <td>${escapeHtml(booking.date)} ${escapeHtml(booking.time)}</td>
-            <td>${escapeHtml(booking.from)}${escapeHtml(booking.to ? ' → ' + booking.to : '')}</td>
+            <td>${escapeHtml(booking.from)}${escapeHtml(booking.to ? ' – ' + booking.to : '')}</td>
             <td>${booking.source==='partner'?'<strong>JYSK · '+escapeHtml(booking.partnerStore||'')+'</strong><br>':''}${escapeHtml(booking.serviceDescription || '-')}</td>
             <td><span class="status-badge ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span></td>
             <td>
@@ -429,7 +429,7 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Lokacija:</div>
-            <div class="detail-value">${escapeHtml(route?.to ? route.from+' → '+route.to : booking.location || booking.from || 'Nije navedena')}</div>
+            <div class="detail-value">${escapeHtml(route?.to ? route.from+' – '+route.to : booking.location || booking.from || 'Nije navedena')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Udaljenost:</div>

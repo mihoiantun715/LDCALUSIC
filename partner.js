@@ -1,5 +1,5 @@
 import {showDeliveryProof} from './delivery-proof-view.mjs';
-import {createPartnerWorkspace} from './partner-workspace.mjs?v=3';
+import {createPartnerWorkspace} from './partner-workspace.mjs?v=clean-ui-1';
 import {attachAddressChecks} from './partner-addresses.mjs?v=loading-1';
 import {auth,functions,httpsCallable,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from './firebase-config.js?v=loading-1';
 import {sendPasswordReset} from './firebase-auth.js?v=loading-1';
