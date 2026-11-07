@@ -22,45 +22,13 @@ exports.sendBookingConfirmation = functions.firestore
     if (booking.bookingType === 'destination') return null;
     const bookingId = context.params.bookingId;
 
-    console.log('Booking data received:', JSON.stringify(booking));
-    
-    // Validate required fields
-    if (!booking.email) {
-      console.error('No email address in booking data');
-      return null;
+    // Resolve the linked delivery for a complete route in notification emails.
+    if(booking.bookingType==='origin'&&booking.originalBookingId){
+      const destination=await admin.firestore().collection('bookings').doc(booking.originalBookingId).get();
+      if(destination.exists)booking.to=destination.data().location||destination.data().from||'';
     }
-    
-    if (!booking.name) {
-      console.error('No name in booking data');
-      return null;
-    }
-
-    // Email to customer
-    const customerMailOptions = {
-      from: 'LDCALUSIC PRIJEVOZ I USLUGE <ldcalusicprijevoziusluge@gmail.com>',
-      to: booking.email,
-      subject: 'Zaprimili smo vaš zahtjev — LD Čalušić',
-      ...emailTemplates.booking(booking, bookingId)
-    };
-
-    // Email to admin
-    const adminMailOptions = {
-      from: 'LDCALUSIC PRIJEVOZ I USLUGE <ldcalusicprijevoziusluge@gmail.com>',
-      to: 'ldcalusicprijevoziusluge@gmail.com',
-      subject: `Nova rezervacija - ${getServiceName(booking.service)}`,
-      ...emailTemplates.booking(booking, bookingId, true)
-    };
-
-    try {
-      // Send both emails
-      await transporter.sendMail(customerMailOptions);
-      await transporter.sendMail(adminMailOptions);
-      console.log(`Emails sent for booking ${bookingId}`);
-      return null;
-    } catch (error) {
-      console.error('Error sending emails:', error);
-      return null;
-    }
+    await require('./booking-notifications').sendBookingEmails(booking,bookingId,mail=>transporter.sendMail(mail));
+    return null;
   });
 
 // Helper function to get service name in Croatian
