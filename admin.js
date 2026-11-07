@@ -13,6 +13,7 @@ checkAuthState(async (user) => {
         if (!isAdminUser) {
             window.location.href = 'admin-login.html';
         } else {
+            document.getElementById('adminName').textContent=user.displayName || 'Administrator';
             // Load initial data
             loadOverview();
         }
@@ -59,8 +60,10 @@ async function loadOverview() {
         getAllUsers()
     ]);
 
+    if(!bookingsResult.success || !usersResult.success){document.getElementById('recentActivity').textContent='Podaci se trenutačno ne mogu učitati. Ponovno otvorite pregled.';return;}
     if (bookingsResult.success && usersResult.success) {
         const bookings = bookingsResult.bookings;
+        allBookings=bookings;allUsers=usersResult.users;
         const users = usersResult.users;
 
         document.getElementById('totalBookings').textContent = bookings.length;
@@ -69,16 +72,16 @@ async function loadOverview() {
         document.getElementById('totalUsers').textContent = users.length;
 
         const recentActivity = document.getElementById('recentActivity');
-        const recent = bookings.slice(-10).reverse();
+        const recent = [...bookings].sort((a,b)=>dateMillis(b.createdAt)-dateMillis(a.createdAt)).slice(0,10);
         
         if (recent.length === 0) {
             recentActivity.innerHTML = '<p class="no-data">Nema nedavnih aktivnosti</p>';
         } else {
             recentActivity.innerHTML = recent.map(booking => `
                 <div class="activity-item">
-                    <div class="activity-time">${formatDate(booking.createdAt)}</div>
+                    <div class="activity-time">${escapeHtml(formatDate(booking.createdAt))}</div>
                     <div class="activity-text">
-                        Nova rezervacija: <strong>${getServiceName(booking.serviceCategory)}</strong> - ${booking.from}
+                        Nova rezervacija: <strong>${escapeHtml(getServiceName(booking.serviceCategory))}</strong> - ${escapeHtml(booking.from)}
                     </div>
                 </div>
             `).join('');
@@ -87,11 +90,11 @@ async function loadOverview() {
 }
 
 async function loadBookings() {
-    const result = await getAllBookings();
-    
+    const [result, usersResult] = await Promise.all([getAllBookings(),getAllUsers()]);
+    if(usersResult.success)allUsers=usersResult.users;
     if (result.success) {
         allBookings = result.bookings;
-        displayBookings(allBookings);
+        filterBookings();
     } else {
         console.error('Error loading bookings:', result.message);
         document.getElementById('bookingsTableBody').innerHTML = '<tr><td colspan="8" class="no-data">Greška pri učitavanju rezervacija</td></tr>';
@@ -109,17 +112,17 @@ function displayBookings(bookings) {
     tbody.innerHTML = bookings.map(booking => `
         <tr>
             <td>#${booking.id.slice(-6)}</td>
-            <td>${getUserName(booking.userId)}</td>
-            <td>${getServiceName(booking.serviceCategory)}</td>
-            <td>${booking.date} ${booking.time}</td>
-            <td>${booking.from}${booking.to ? ' → ' + booking.to : ''}</td>
-            <td>${booking.serviceDescription || '-'}</td>
-            <td><span class="status-badge ${booking.status}">${getStatusText(booking.status)}</span></td>
+            <td>${escapeHtml(getUserName(booking.userId))}</td>
+            <td>${escapeHtml(getServiceName(booking.serviceCategory))}</td>
+            <td>${escapeHtml(booking.date)} ${escapeHtml(booking.time)}</td>
+            <td>${escapeHtml(booking.from)}${escapeHtml(booking.to ? ' → ' + booking.to : '')}</td>
+            <td>${escapeHtml(booking.serviceDescription || '-')}</td>
+            <td><span class="status-badge ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span></td>
             <td>
-                <button class="action-btn btn-view" onclick="viewBooking('${booking.id}')">
+                <button aria-label="Prikaži detalje" class="action-btn btn-view" onclick="viewBooking('${booking.id}')">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="action-btn btn-delete" onclick="confirmDeleteBooking('${booking.id}')">
+                <button aria-label="Obriši" class="action-btn btn-delete" onclick="confirmDeleteBooking('${booking.id}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -149,8 +152,8 @@ function filterBookings() {
     if (searchTerm) {
         filtered = filtered.filter(b => 
             b.id.toLowerCase().includes(searchTerm) ||
-            getUserName(b.userId).toLowerCase().includes(searchTerm) ||
-            b.from.toLowerCase().includes(searchTerm)
+            String(b.name||b.email||getUserName(b.userId)).toLowerCase().includes(searchTerm) ||
+            String(b.from||'').toLowerCase().includes(searchTerm)
         );
     }
 
@@ -158,7 +161,8 @@ function filterBookings() {
 }
 
 async function loadUsers() {
-    const result = await getAllUsers();
+    const [result, bookingsResult] = await Promise.all([getAllUsers(),getAllBookings()]);
+    if(bookingsResult.success)allBookings=bookingsResult.bookings;
     
     if (result.success) {
         allUsers = result.users;
@@ -189,17 +193,17 @@ async function displayUsers(users) {
         return `
             <tr>
                 <td>#${user.id.slice(-6)}</td>
-                <td>${user.name} ${isAdmin ? '<span style="color: #e31e24; font-weight: bold;">👑 ADMIN</span>' : ''}</td>
-                <td>${user.email}</td>
-                <td>${user.phone || '-'}</td>
-                <td>${formatDate(user.createdAt)}</td>
-                <td>${userBookings}</td>
+                <td>${escapeHtml(user.name)} ${isAdmin ? '<span style="color: #e31e24; font-weight: bold;">ADMIN</span>' : ''}</td>
+                <td>${escapeHtml(user.email)}</td>
+                <td>${escapeHtml(user.phone || '-')}</td>
+                <td>${escapeHtml(formatDate(user.createdAt))}</td>
+                <td>${escapeHtml(userBookings)}</td>
                 <td>
                     <button class="action-btn btn-view" onclick="viewUserDetails('${user.id}')">
                         <i class="fas fa-eye"></i>
                     </button>
                     ${!isAdmin ? `
-                        <button class="action-btn btn-success" onclick="makeAdmin('${user.id}', '${user.email}', '${user.name}')" title="Make Admin">
+                        <button class="action-btn btn-success" onclick="makeAdminById('${user.id}')" title="Make Admin">
                             <i class="fas fa-user-shield"></i>
                         </button>
                     ` : `
@@ -207,7 +211,7 @@ async function displayUsers(users) {
                             <i class="fas fa-user-minus"></i>
                         </button>
                     `}
-                    <button class="action-btn btn-delete" onclick="deleteUser('${user.id}', '${user.name}')" title="Delete User">
+                    <button class="action-btn btn-delete" onclick="deleteUserById('${user.id}')" title="Delete User">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -219,8 +223,8 @@ async function displayUsers(users) {
 document.getElementById('searchUser').addEventListener('input', (e) => {
     const searchTerm = e.target.value.toLowerCase();
     const filtered = allUsers.filter(u => 
-        u.name.toLowerCase().includes(searchTerm) ||
-        u.email.toLowerCase().includes(searchTerm)
+        String(u.name||'').toLowerCase().includes(searchTerm) ||
+        String(u.email||'').toLowerCase().includes(searchTerm)
     );
     displayUsers(filtered);
 });
@@ -328,23 +332,23 @@ window.viewUserDetails = function(userId) {
         details.innerHTML = `
             <div class="detail-row">
                 <strong>Ime:</strong>
-                <span>${user.name}</span>
+                <span>${escapeHtml(user.name)}</span>
             </div>
             <div class="detail-row">
                 <strong>Email:</strong>
-                <span>${user.email}</span>
+                <span>${escapeHtml(user.email)}</span>
             </div>
             <div class="detail-row">
                 <strong>Telefon:</strong>
-                <span>${user.phone || 'N/A'}</span>
+                <span>${escapeHtml(user.phone || 'N/A')}</span>
             </div>
             <div class="detail-row">
                 <strong>Datum Registracije:</strong>
-                <span>${formatDate(user.createdAt)}</span>
+                <span>${escapeHtml(formatDate(user.createdAt))}</span>
             </div>
             <div class="detail-row">
                 <strong>Ukupno Rezervacija:</strong>
-                <span>${userBookings.length}</span>
+                <span>${escapeHtml(userBookings.length)}</span>
             </div>
         `;
         
@@ -398,6 +402,8 @@ let allRouteBookings = [];
 let routeGroups = {}; // For splitting routes to multiple drivers
 
 async function loadRoutesMap() {
+    if(!isAdminUser)return;
+    if(!window.google?.maps){document.getElementById('routesList').textContent='Mapa se trenutačno ne može učitati. Pokušajte ponovno otvoriti ovu karticu.';return;}
     const result = await getAllBookings();
     
     if (!result.success) {
@@ -488,8 +494,8 @@ async function loadRoutesMap() {
     
     // Sort bookings by position
     bookings.sort((a, b) => {
-        if (a.position === null) return 1;
-        if (b.position === null) return -1;
+        if (a.position == null) return 1;
+        if (b.position == null) return -1;
         return a.position - b.position;
     });
     
@@ -534,19 +540,19 @@ async function loadRoutesMap() {
             ? `<span style="background: #28a745; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">#${booking.position + 1}</span>` 
             : '<span style="background: #ffc107; color: #000; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;" title="Kliknite \'Auto Dodijeli Pozicije\' za dodjelu pozicija">?</span>';
         
-        const bookingTypeLabel = booking.bookingType ? `<span style="font-size: 0.8rem; color: #666; margin-left: 8px;">(${booking.locationLabel || booking.bookingType})</span>` : '';
+        const bookingTypeLabel = booking.bookingType ? `<span style="font-size: 0.8rem; color: #666; margin-left: 8px;">(${escapeHtml(booking.locationLabel || booking.bookingType)})</span>` : '';
         
         routeCard.innerHTML = `
             <div class="route-header" style="display: flex; align-items: center; gap: 10px;">
                 ${positionBadge}
                 <div style="flex: 1;">
                     <h4 style="font-size: 1rem; margin: 0;">${serviceName} ${bookingTypeLabel}</h4>
-                    <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">${booking.name || booking.email}</div>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 3px;">${escapeHtml(booking.name || booking.email)}</div>
                 </div>
                 <span class="booking-status ${booking.status}">${getStatusText(booking.status)}</span>
             </div>
             <div class="route-summary" style="font-size: 0.9rem; color: #666; margin: 8px 0;">
-                <strong>${locationPrefix}:</strong> ${displayLocation}
+                <strong>${locationPrefix}:</strong> ${escapeHtml(displayLocation)}
             </div>
             <div class="route-actions" style="display: flex; gap: 8px; margin-top: 10px;">
                 <button onclick="event.stopPropagation(); movePosition('${booking.id}', 'up')" style="padding: 6px 10px; font-size: 0.85rem; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;" ${booking.position === null || booking.position === 0 ? 'disabled' : ''}>
@@ -638,7 +644,7 @@ async function loadRoutesMap() {
                                 strokeColor: 'white',
                                 strokeWeight: 3
                             },
-                            title: `${booking.position + 1}. ${booking.name || booking.email}`
+                            title: `${booking.position + 1}. ${escapeHtml(booking.name || booking.email)}`
                         });
                         
                         marker.addListener('click', () => {
@@ -702,7 +708,7 @@ async function loadRoutesMap() {
                             strokeColor: 'white',
                             strokeWeight: 3
                         },
-                        title: `${hasPosition ? (booking.position + 1) + '. ' : '[Bez pozicije] '}${booking.name || booking.email} - ${booking.from}`
+                        title: `${hasPosition ? (booking.position + 1) + '. ' : '[Bez pozicije] '}${escapeHtml(booking.name || booking.email)} - ${booking.from}`
                     });
                     
                     marker.addListener('click', () => {
@@ -1047,7 +1053,7 @@ function displayRouteGroups() {
                 <div style="max-height: 200px; overflow-y: auto;">
                     ${routes.map((r, i) => `
                         <div style="padding: 8px; background: #f8f9fa; margin-bottom: 5px; border-radius: 5px; font-size: 0.9rem;">
-                            <strong>${i + 1}.</strong> ${r.name || r.email} - ${r.locationLabel || r.bookingType}: ${r.location || r.from}
+                            <strong>${i + 1}.</strong> ${escapeHtml(r.name || r.email)} - ${escapeHtml(r.locationLabel || r.bookingType)}: ${escapeHtml(r.location || r.from)}
                         </div>
                     `).join('')}
                 </div>
@@ -1059,7 +1065,7 @@ function displayRouteGroups() {
         <div style="background: white; padding: 30px; border-radius: 15px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="margin: 0;"><i class="fas fa-users"></i> Podjela Ruta za Vozače</h2>
-                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                <button data-close-routes style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-times"></i> Zatvori
                 </button>
             </div>
@@ -1074,6 +1080,7 @@ function displayRouteGroups() {
     `;
     
     document.body.appendChild(modal);
+    modal.querySelector('[data-close-routes]')?.addEventListener('click',()=>modal.remove());
 }
 
 window.printRouteGroups = function() {
@@ -1083,12 +1090,13 @@ window.printRouteGroups = function() {
         const routes = routeGroups[driver];
         printContent += `<h2>${driver} (${routes.length} ruta)</h2><ol>`;
         routes.forEach(r => {
-            printContent += `<li>${r.name || r.email} - ${r.locationLabel || r.bookingType}: ${r.location || r.from}</li>`;
+            printContent += `<li>${escapeHtml(r.name || r.email)} - ${escapeHtml(r.locationLabel || r.bookingType)}: ${escapeHtml(r.location || r.from)}</li>`;
         });
         printContent += '</ol><hr>';
     });
     
     const printWindow = window.open('', '', 'width=800,height=600');
+    if(!printWindow){notify.warning('Dopustite otvaranje prozora za ispis.');return;}
     printWindow.document.write(`
         <html>
             <head>
@@ -1115,10 +1123,10 @@ document.getElementById('routeStatusFilter')?.addEventListener('change', (e) => 
 });
 
 window.viewBooking = function(bookingId) {
-    const booking = allRouteBookings.find(b => b.id === bookingId);
+    const booking = allBookings.find(b => b.id === bookingId) || allRouteBookings.find(b => b.id === bookingId);
     if (!booking) return;
 
-    currentBookingId = bookingId;
+    currentBookingId = booking.originalBookingId || bookingId;
     const modal = document.getElementById('bookingModal');
     const details = document.getElementById('bookingDetails');
 
@@ -1129,59 +1137,59 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Korisnik:</div>
-            <div class="detail-value">${booking.name || booking.email || getUserName(booking.userId)}</div>
+            <div class="detail-value">${escapeHtml(booking.name || booking.email || getUserName(booking.userId))}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Email:</div>
-            <div class="detail-value">${booking.email || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.email || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Telefon:</div>
-            <div class="detail-value">${booking.phone || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.phone || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Tip Rezervacije:</div>
-            <div class="detail-value">${booking.locationLabel || booking.bookingType || 'Standard'}</div>
+            <div class="detail-value">${escapeHtml(booking.locationLabel || booking.bookingType || 'Standard')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Usluga:</div>
-            <div class="detail-value">${getServiceNameCroatian(booking.service)}</div>
+            <div class="detail-value">${escapeHtml(getServiceNameCroatian(booking.service))}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Datum & Vrijeme:</div>
-            <div class="detail-value">${booking.date} ${booking.time || ''}</div>
+            <div class="detail-value">${escapeHtml(booking.date)} ${escapeHtml(booking.time || '')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Lokacija:</div>
-            <div class="detail-value">${booking.location || booking.from}${booking.to ? ' → ' + booking.to : ''}</div>
+            <div class="detail-value">${escapeHtml(booking.location || booking.from)}${escapeHtml(booking.to ? ' → ' + booking.to : '')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Udaljenost:</div>
-            <div class="detail-value">${booking.distance || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.distance || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Trajanje:</div>
-            <div class="detail-value">${booking.duration || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.duration || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Opis Usluge:</div>
-            <div class="detail-value">${booking.serviceDescription || booking.message || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.serviceDescription || booking.message || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Približna Težina:</div>
-            <div class="detail-value">${booking.approxWeight ? booking.approxWeight + ' kg' : '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.approxWeight ? booking.approxWeight + ' kg' : '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Napomene:</div>
-            <div class="detail-value">${booking.notes || '-'}</div>
+            <div class="detail-value">${escapeHtml(booking.notes || '-')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Status:</div>
-            <div class="detail-value"><span class="status-badge ${booking.status}">${getStatusText(booking.status)}</span></div>
+            <div class="detail-value"><span class="status-badge ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span></div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Kreirano:</div>
-            <div class="detail-value">${formatDate(booking.createdAt)}</div>
+            <div class="detail-value">${escapeHtml(formatDate(booking.createdAt))}</div>
         </div>
     `;
 
@@ -1218,7 +1226,7 @@ async function acceptBooking() {
             status: 'confirmed'
         });
         
-        notify.success('Rezervacija prihvaćena! Email poslan korisniku.');
+        notify.success('Rezervacija prihvaćena. Obavijest korisniku šalje se automatski.');
         document.getElementById('bookingModal').style.display = 'none';
         loadBookings();
         loadRoutesMap();
@@ -1244,7 +1252,7 @@ async function denyBooking() {
             cancelledBy: 'admin'
         });
         
-        notify.success('Rezervacija odbijena! Email poslan korisniku.');
+        notify.success('Rezervacija odbijena. Obavijest korisniku šalje se automatski.');
         document.getElementById('bookingModal').style.display = 'none';
         loadBookings();
         loadRoutesMap();
@@ -1328,7 +1336,7 @@ function viewUserDetails(userId) {
 
 function getUserName(userId) {
     const user = allUsers.find(u => u.id === userId);
-    return user ? user.name : 'Nepoznat korisnik';
+    return user?.name || user?.email || allBookings.find(b=>b.userId===userId)?.name || 'Gost';
 }
 
 function getServiceName(service) {
@@ -1381,38 +1389,16 @@ window.addEventListener('click', (e) => {
     }
 });
 
-function generateMonthlyReport() {
-    notify.info('Mjesečni izvještaj će biti generiran...', 'Izvještaj');
-}
+function csvDownload(name,rows){const cell=v=>'"'+String(v??'').replace(/^[=+@-]/,"'").replaceAll('"','""')+'"';const data='\uFEFF'+rows.map(r=>r.map(cell).join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+async function exportBookings(start,end){const result=await getAllBookings();if(!result.success){notify.error(result.message||'Učitavanje nije uspjelo.');return;}const rows=result.bookings.filter(b=>(!start||b.date>=start)&&(!end||b.date<=end));csvDownload('rezervacije.csv',[['ID','Klijent','Email','Telefon','Usluga','Datum','Vrijeme','Polazište','Odredište','Status'],...rows.map(b=>[b.id,b.name,b.email,b.phone,getServiceName(b.serviceCategory),b.date,b.time,b.from,b.to,getStatusText(b.status)])]);}
+window.generateMonthlyReport=()=>{const d=new Date(),start=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01',end=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return exportBookings(start,end);};
+window.generateYearlyReport=()=>exportBookings(new Date().getFullYear()+'-01-01',new Date().getFullYear()+'-12-31');
+window.generateUsersReport=async()=>{const r=await getAllUsers();if(!r.success){notify.error(r.message);return;}csvDownload('korisnici.csv',[['Ime','Email','Telefon','Registracija'],...r.users.map(u=>[u.name,u.email,u.phone,formatDate(u.createdAt)])]);};
+window.generateCustomReport=()=>{const start=document.getElementById('reportStartDate').value,end=document.getElementById('reportEndDate').value;if(!start||!end||start>end){notify.warning('Odaberite ispravan početni i završni datum.');return;}return exportBookings(start,end);};
+window.changeAdminPassword=()=>{window.location.href='password-reset.html';};
+window.makeAdminById=id=>{const u=allUsers.find(u=>u.id===id);if(u)window.makeAdmin(id,u.email,u.name);};
+window.deleteUserById=id=>{const u=allUsers.find(u=>u.id===id);if(u)window.deleteUser(id,u.name);};
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function dateMillis(v){if(v?.toDate)return v.toDate().getTime();if(v?.seconds)return v.seconds*1000;return new Date(v||0).getTime()||0;}
 
-function generateYearlyReport() {
-    notify.info('Godišnji izvještaj će biti generiran...', 'Izvještaj');
-}
-
-function generateUsersReport() {
-    notify.info('Izvještaj korisnika će biti generiran...', 'Izvještaj');
-}
-
-function generateCustomReport() {
-    const startDate = document.getElementById('reportStartDate').value;
-    const endDate = document.getElementById('reportEndDate').value;
-    
-    if (!startDate || !endDate) {
-        notify.warning('Molimo odaberite datume');
-        return;
-    }
-    
-    notify.info(`Prilagođeni izvještaj od ${startDate} do ${endDate} će biti generiran...`, 'Izvještaj');
-}
-
-function saveWorkingHours() {
-    const start = document.getElementById('workStart').value;
-    const end = document.getElementById('workEnd').value;
-    notify.success(`Radno vrijeme spremljeno: ${start} - ${end}`);
-}
-
-function changeAdminPassword() {
-    notify.info('Funkcionalnost promjene lozinke će biti implementirana uskoro.', 'Promjena Lozinke');
-}
-
-loadOverview();
+for(const modal of document.querySelectorAll('#bookingModal,#userModal')){modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');const heading=modal.querySelector('h2');if(heading){heading.id=modal.id+'Title';modal.setAttribute('aria-labelledby',heading.id);}let previous;new MutationObserver(()=>{if(modal.style.display==='block'){previous=document.activeElement;modal.querySelector('.close')?.focus();}else previous?.focus();}).observe(modal,{attributes:true,attributeFilter:['style']});modal.addEventListener('keydown',e=>{if(e.key==='Escape'){modal.style.display='none';}if(e.key==='Tab'){const list=[...modal.querySelectorAll('button,select,input,[tabindex="0"]')].filter(el=>el.getClientRects().length);if(e.shiftKey&&document.activeElement===list[0]){e.preventDefault();list.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===list.at(-1)){e.preventDefault();list[0]?.focus();}}});}

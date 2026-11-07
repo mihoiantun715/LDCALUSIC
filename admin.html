@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="admin-routes.css">
     <link rel="stylesheet" href="notification.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="brand.css?v=1">
+<link rel="stylesheet" href="dashboard-v2.css?v=1"><link rel="stylesheet" href="admin-v2.css?v=1"><link rel="stylesheet" href="brand.css?v=1">
 </head>
-<body>
+<body class="account-dashboard admin-dashboard">
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo"><a href="index.html" class="brand-logo-link" aria-label="LD Čalušić — početna"><img src="assets/ld/logo-clean.png" alt="LD Čalušić prijevoz i usluge" class="brand-logo-image" width="2172" height="724"></a></div>
@@ -35,7 +35,7 @@
 
     <div class="dashboard-container">
         <aside class="sidebar">
-            <div class="sidebar-menu">
+            <div class="sidebar-caption">ADMINISTRACIJA</div><div class="sidebar-menu">
                 <a href="#" class="sidebar-item active" data-section="overview">
                     <i class="fas fa-chart-line"></i>
                     <span>Pregled</span>
@@ -70,7 +70,7 @@
         <main class="dashboard-content">
             <!-- Overview Section -->
             <section id="overview" class="content-section active">
-                <h1>Pregled Sustava</h1>
+                <div class="dashboard-eyebrow">POSLOVANJE NA JEDNOM MJESTU</div><h1>Pregled poslovanja</h1><p class="section-desc">Rezervacije, termini i klijenti — sve na jednom mjestu.</p>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -111,7 +111,7 @@
                 </div>
 
                 <div class="recent-section">
-                    <h2>Nedavne Aktivnosti</h2>
+                    <h2>Najnovije rezervacije</h2>
                     <div id="recentActivity" class="activity-list">
                         <p class="no-data">Učitavanje...</p>
                     </div>
@@ -135,7 +135,7 @@
                             <option value="transport">Prijevoz i Dostava</option>
                             <option value="cleaning">Čišćenje</option>
                             <option value="garden">Održavanje Zelenih Površina</option>
-                            <option value="rental">Najam Opreme</option>
+                            <option value="rental">Najam (arhiva)</option>
                             <option value="special">Specijalne Usluge</option>
                         </select>
                         <input type="text" id="searchBooking" class="search-input" placeholder="Pretraži po imenu ili ID...">
@@ -233,7 +233,7 @@
                         <p>rezervacija</p>
                     </div>
                     <div class="service-stat-card">
-                        <h3><i class="fas fa-handshake"></i> Najam Opreme</h3>
+                        <h3><i class="fas fa-handshake"></i> Najam (arhiva)</h3>
                         <div class="stat-number" id="rentalCount">0</div>
                         <p>rezervacija</p>
                     </div>
@@ -288,39 +288,7 @@
             <section id="settings" class="content-section">
                 <h1>Postavke Sustava</h1>
                 <div class="settings-container">
-                    <div class="settings-card">
-                        <h3>Obavijesti</h3>
-                        <div class="setting-item">
-                            <label class="switch">
-                                <input type="checkbox" id="emailNotifications" checked>
-                                <span class="slider"></span>
-                            </label>
-                            <span>Email obavijesti za nove rezervacije</span>
-                        </div>
-                        <div class="setting-item">
-                            <label class="switch">
-                                <input type="checkbox" id="smsNotifications">
-                                <span class="slider"></span>
-                            </label>
-                            <span>SMS obavijesti</span>
-                        </div>
-                    </div>
-
-                    <div class="settings-card">
-                        <h3>Radno Vrijeme</h3>
-                        <div class="working-hours">
-                            <div class="hour-input">
-                                <label>Početak:</label>
-                                <input type="time" id="workStart" value="08:00">
-                            </div>
-                            <div class="hour-input">
-                                <label>Kraj:</label>
-                                <input type="time" id="workEnd" value="20:00">
-                            </div>
-                        </div>
-                        <button class="btn-primary" onclick="saveWorkingHours()">Spremi Promjene</button>
-                    </div>
-
+                    <div class="settings-card"><h3>Dostupnost i kontakt</h3><p>Dostupni smo 0–24. Termin svake usluge dogovara se s klijentom.</p><a href="tel:+385976841992">+385 97 684 1992</a><p>ldcalusicprijevoziusluge@gmail.com</p></div>
                     <div class="settings-card">
                         <h3>Sigurnost</h3>
                         <button class="btn-secondary" onclick="changeAdminPassword()">
@@ -335,7 +303,7 @@
     <!-- Booking Details Modal -->
     <div id="bookingModal" class="modal">
         <div class="modal-content modal-large">
-            <span class="close">&times;</span>
+            <button type="button" class="close" aria-label="Zatvori">&times;</button>
             <h2>Detalji Rezervacije</h2>
             <div id="bookingDetails" class="booking-details-full">
                 <!-- Details will be populated by JavaScript -->
@@ -367,7 +335,7 @@
     <!-- User Details Modal -->
     <div id="userModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeUserModal()">&times;</span>
+            <button type="button" class="close" onclick="closeUserModal()" aria-label="Zatvori">&times;</button>
             <h2>Detalji Korisnika</h2>
             <div id="userDetails" class="user-details-full">
                 <!-- Details will be populated by JavaScript -->
@@ -377,7 +345,7 @@
 
     <script src="notification.js?v=2"></script>
     <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="admin.js?v=2"></script>
+    <script type="module" src="admin.js?v=3"></script>
     <script>
         // Load Google Maps API for route visualization
         function loadGoogleMapsAdmin() {
