@@ -6,7 +6,8 @@ test('public booking verifies code, commits paired records atomically and dedupl
  let records=new Map(),seq=0;const ref=path=>({path,id:path.split('/').at(-1),update:async data=>records.set(path,{...records.get(path),...data})});
  const db={collection:name=>({doc:id=>ref(name+'/'+(id||'id'+(++seq)))}),runTransaction:async fn=>{const draft=new Map(records),tx={get:async r=>({exists:draft.has(r.path),data:()=>draft.get(r.path)}),set:(r,d)=>draft.set(r.path,d),update:(r,d)=>draft.set(r.path,{...draft.get(r.path),...d})};const result=await fn(tx);records=draft;return result;}};
  const firestore=()=>db;firestore.FieldValue={serverTimestamp:()=>123};
- const functions={https:{onCall:fn=>fn,HttpsError:class extends Error{constructor(code,message){super(message);this.code=code;}}},firestore:{document:()=>({onCreate:fn=>fn,onUpdate:fn=>fn})}};
+ const functions={https:{onCall:fn=>fn,HttpsError:class extends Error{constructor(code,message){super(message);this.code=code;}}},firestore:{document:()=>({onCreate:fn=>fn,onUpdate:fn=>fn,onWrite:fn=>fn})}};
+ functions.runWith=()=>functions;
  const exports={};vm.runInNewContext(fs.readFileSync(__dirname+'/index.js','utf8'),{exports,console,require:name=>name==='firebase-functions'?functions:name==='firebase-admin'?{initializeApp(){},firestore}:name==='nodemailer'?{createTransport:()=>({sendMail:async()=>{}})}:require(name)});
  await assert.rejects(exports.submitPublicBooking(sample,{}),/Kod je istekao/);
  await exports.sendVerificationCode({email:sample.email,code:sample.verificationCode},{});

@@ -118,3 +118,7 @@ exports.submitPublicBooking = functions.https.onCall(async (data,context)=>{
 exports.partnerPortal = functions.https.onCall(require('./partner-portal').createPartnerHandler({admin,functions}));
 
 exports.driverPortal = functions.https.onCall(require('./driver-portal').createDriverHandler({admin,functions}));
+
+exports.driverAssignmentPush=functions.runWith({secrets:['DRIVER_PUSH_PRIVATE']}).firestore.document('driverTours/{id}').onWrite(change=>require('./driver-push').assignmentPush(admin,change));
+exports.driverBookingPush=functions.runWith({secrets:['DRIVER_PUSH_PRIVATE']}).firestore.document('bookings/{id}').onWrite(change=>require('./driver-push').bookingPush(admin,change));
+exports.driverTourFinishedEmail=functions.runWith({failurePolicy:true}).firestore.document('tourCompletions/{id}').onCreate(async snapshot=>{const current=(await snapshot.ref.get()).data();const messages=require('./tour-finish').finishEmails(current);for(const mail of messages){const key=require('crypto').createHash('sha256').update(mail.to).digest('hex');if(current.sent?.[key])continue;await transporter.sendMail(mail);await snapshot.ref.update({['sent.'+key]:admin.firestore.FieldValue.serverTimestamp()});}});
