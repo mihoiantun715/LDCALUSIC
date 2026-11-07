@@ -1,6 +1,7 @@
+import { functions, httpsCallable } from './firebase-config.js';
 import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js';
-import {createRoutePlanner} from './route-planner.js?v=driver-print-1';
+import {createRoutePlanner} from './route-planner.js?v=partner-1';
 // Import Firebase auth functions
 import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=admin-access-2';
 
@@ -119,7 +120,7 @@ function displayBookings(bookings) {
             <td>${escapeHtml(getServiceName(booking.serviceCategory))}</td>
             <td>${escapeHtml(booking.date)} ${escapeHtml(booking.time)}</td>
             <td>${escapeHtml(booking.from)}${escapeHtml(booking.to ? ' → ' + booking.to : '')}</td>
-            <td>${escapeHtml(booking.serviceDescription || '-')}</td>
+            <td>${booking.source==='partner'?'<strong>JYSK · '+escapeHtml(booking.partnerStore||'')+'</strong><br>':''}${escapeHtml(booking.serviceDescription || '-')}</td>
             <td><span class="status-badge ${escapeHtml(booking.status)}">${escapeHtml(getStatusText(booking.status))}</span></td>
             <td>
                 <button aria-label="Prikaži detalje" class="action-btn btn-view" onclick="viewBooking('${escapeHtml(booking.id)}')">
@@ -156,7 +157,8 @@ function filterBookings() {
         filtered = filtered.filter(b => 
             b.id.toLowerCase().includes(searchTerm) ||
             String(b.name||b.email||getUserName(b.userId)).toLowerCase().includes(searchTerm) ||
-            String(b.from||'').toLowerCase().includes(searchTerm)
+            String(b.from||'').toLowerCase().includes(searchTerm) ||
+            [b.partnerName,b.partnerStore,b.orderNumber,b.phone].filter(Boolean).join(' ').toLowerCase().includes(searchTerm)
         );
     }
 
@@ -422,7 +424,7 @@ window.viewBooking = function(bookingId) {
         </div>
         <div class="detail-row">
             <div class="detail-label">Datum & Vrijeme:</div>
-            <div class="detail-value">${escapeHtml(booking.date)} ${escapeHtml(booking.time || '')}</div>
+            <div class="detail-value">${escapeHtml(booking.date || (booking.source==='partner'?'Čeka raspoređivanje':'—'))} ${escapeHtml(booking.time || '')}</div>
         </div>
         <div class="detail-row">
             <div class="detail-label">Lokacija:</div>
@@ -469,6 +471,15 @@ window.viewBooking = function(bookingId) {
         }).catch(error=>{if(distanceEl.isConnected){distanceEl.textContent=error.message;durationEl.textContent='Procjena nije dostupna';}});
     }
 
+    if(booking.source==='partner'){
+        const box=document.createElement('section');box.className='planner-issue';
+        const info=document.createElement('p');info.textContent='JYSK · '+(booking.partnerStore||'')+' · Kontakt trgovine: '+(booking.partnerContact||'')+' '+(booking.partnerPhone||'');box.append(info);
+        const request=document.createElement('p');request.textContent='Narudžba: '+(booking.orderNumber||'—')+' · '+({agreed:'Dogovoreni termin',preferred:'Željeni termin',flexible:'Termin nije dogovoren'}[booking.appointmentType]||'Termin')+': '+(booking.requestedDate||'—')+' '+(booking.requestedTime||'');box.append(request);
+        const form=document.createElement('form');const date=document.createElement('input');date.type='date';date.required=true;date.value=booking.date||booking.requestedDate||'';date.setAttribute('aria-label','Datum dostave');
+        const time=document.createElement('input');time.type='time';time.value=booking.time||booking.requestedTime||'';time.setAttribute('aria-label','Vrijeme dostave');
+        const button=document.createElement('button');button.type='submit';button.className='btn-primary';button.textContent='Spremi termin za planiranje';form.append(date,time,button);box.append(form);details.prepend(box);
+        form.addEventListener('submit',async e=>{e.preventDefault();if(button.disabled)return;button.disabled=true;try{await httpsCallable(functions,'partnerPortal')({action:'schedule',id:booking.id,date:date.value,time:time.value});Object.assign(booking,{date:date.value,time:time.value,position:null,routeDriver:null,routePlanDate:null});notify.success('Termin je spremljen. U Mapi ruta odaberite taj datum i osvježite plan.');window.viewBooking(booking.id);}catch(error){notify.error(error.message);}finally{button.disabled=false;}});
+    }
     // Show Accept/Deny buttons only for pending bookings
     const modalActions = document.getElementById('modalActions');
     const modalActionsAlternate = document.getElementById('modalActionsAlternate');

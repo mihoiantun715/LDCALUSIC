@@ -186,3 +186,5 @@ exports.submitPublicBooking = functions.https.onCall(async (data,context)=>{
  if(result.error)throw new functions.https.HttpsError('failed-precondition',result.error);
  return {success:true,...result};
 });
+
+exports.partnerPortal = functions.https.onCall(require('./partner-portal').createPartnerHandler({admin,functions}));

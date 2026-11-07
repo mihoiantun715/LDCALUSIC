@@ -27,6 +27,7 @@ export function renderDriverPlan(doc,{date,dirty,groups,results=[],timeConflict=
  if(details.phones.length){phone.textContent='';details.phones.forEach((value,index)=>{if(index)add(phone,'br');const link=add(phone,'a',value);const dial=value.replace(/[^\d+]/g,'');if(/^\+?\d{6,15}$/.test(dial))link.href='tel:'+dial;});}
  if(details.emails.length)row(card,'Email klijenta',details.emails.join('\n'));
  row(card,'Usluga',details.service);
+ if(job.docs[0]?.source==='partner'){const b=job.docs[0];row(card,'Partner / narudžba','JYSK · '+(b.partnerStore||'')+' · '+(b.orderNumber||'—'));row(card,'Kontakt trgovine',(b.partnerContact||'')+' '+(b.partnerPhone||''));}
  job.stops.forEach((address,index)=>row(card,job.stops.length===1?'Lokacija':index===0?'Preuzimanje':'Dostava',address));
  row(card,'Opis / teret',details.description||'Dodatni opis nije naveden');
  if(details.weight)row(card,'Približna težina',details.weight);
