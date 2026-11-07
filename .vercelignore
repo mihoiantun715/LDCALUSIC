@@ -16,3 +16,6 @@ work/
 outputs/
 *.code-workspace
 *.log
+
+.git/
+assets/transport.jpg

@@ -25,7 +25,12 @@
       "work/**",
       "outputs/**",
       "**/*.log",
-      "vercel.json"
+      "vercel.json",
+      ".git/**",
+      ".github/**",
+      ".vercel/**",
+      ".firebase/**",
+      "assets/transport.jpg"
     ],
     "rewrites": [
       {
