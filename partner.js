@@ -1,4 +1,4 @@
-import {createPartnerWorkspace} from './partner-workspace.mjs?v=1';
+import {createPartnerWorkspace} from './partner-workspace.mjs?v=2';
 import {attachAddressChecks} from './partner-addresses.mjs';
 import {auth,functions,httpsCallable,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from './firebase-config.js';
 import {sendPasswordReset} from './firebase-auth.js';

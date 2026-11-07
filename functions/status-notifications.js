@@ -1,7 +1,7 @@
 const templates=require('./email-templates');const {COMPANY_EMAIL}=require('./booking-notifications');
 function statusEmails(before,b,id){
  if(b.bookingType==='destination')return [];
- const changed=b.status!==before.status,scheduled=b.source==='partner'&&(b.date!==before.date||b.time!==before.time);
+ const changed=b.status!==before.status,scheduled=b.source==='partner'&&(b.date!==before.date||b.time!==before.time||b.routePlanDate!==before.routePlanDate);
  if(!changed&&!scheduled)return [];
  const states={pending:{subject:'Zahtjev je zaprimljen',message:'Zahtjev je zaprimljen i čeka obradu.'},confirmed:{subject:'Zahtjev je prihvaćen',message:'LD Čalušić prihvatio je zahtjev. Termin izvedbe prikazan je u detaljima; ako još nije naveden, naknadno ćemo ga dogovoriti.'},in_transit:{subject:'Dostava je krenula',message:'LD Čalušić označio je da je dostava krenula prema kupcu.'},completed:{subject:'Dostava je završena',message:'LD Čalušić označio je dostavu kao završenu. Hvala na suradnji.'},cancelled:{subject:'Zahtjev je otkazan',message:'Zahtjev je otkazan. Za detalje se obratite LD Čalušiću.'}};
  const info=changed?states[b.status]:{subject:'Termin dostave je ažuriran',message:'LD Čalušić ažurirao je raspored dostave. Provjerite novi datum i vrijeme u detaljima.'};if(!info)return [];

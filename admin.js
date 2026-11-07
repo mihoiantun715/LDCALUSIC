@@ -1,7 +1,7 @@
 import { functions, httpsCallable } from './firebase-config.js';
 import {serviceCatalog,bookingRoute,describeBooking,measureBookingRoute} from './booking-details.mjs';
 import {setTransportStatus,removeTransportBooking} from './route-store.js?v=tracking-1';
-import {createRoutePlanner} from './route-planner.js?v=driver-handoff-1';
+import {createRoutePlanner} from './route-planner.js?v=driver-handoff-2';
 // Import Firebase auth functions
 import { checkAuthState, checkIfAdmin, getAllBookings, getAllUsers, updateBookingStatus, deleteBooking, logoutUser } from './firebase-auth.js?v=admin-access-2';
 
