@@ -1,0 +1,23 @@
+/* Shared account screens */
+.auth-modal{background:rgba(9,30,61,.62);backdrop-filter:blur(7px);padding:24px 16px;overscroll-behavior:contain}
+.auth-modal .modal-content,.reset-box{width:100%;max-width:480px;margin:24px auto;padding:36px;border:1px solid #dce6f3;border-radius:24px;background:#fff;box-shadow:0 24px 80px #061c3f30;max-height:calc(100dvh - 96px);overflow-y:auto;color:#14365e}
+.auth-brand{font-size:17px;font-weight:800;letter-spacing:-.5px;color:#123c70;margin-bottom:30px}.auth-brand span{display:block;font-size:9px;font-weight:600;letter-spacing:2px;color:#71849e;margin-top:5px}
+.auth-modal .modal-content h2,.reset-box h1{text-align:left;font-size:30px;letter-spacing:-1px;line-height:1.2;margin:0 0 10px;color:#12345d}
+.auth-intro,.reset-box>p{font-size:14px;line-height:1.65;color:#6b7d93;margin:0 0 26px}
+.auth-modal .close{top:22px;right:22px;width:34px;height:34px;border:0;border-radius:50%;background:#f0f5fb;color:#546b88;font-size:24px;line-height:1;font-weight:400;display:grid;place-items:center}
+.auth-modal .close:hover{background:#e2edfc;color:#145bc4}
+.auth-modal .form-group{margin-bottom:18px}.auth-modal .form-group label,.reset-box label{font-size:13px;font-weight:600;color:#254363;margin-bottom:8px}
+.auth-modal .form-group input,.reset-box .form-group input{box-sizing:border-box;display:block;width:100%;min-width:0;max-width:none;height:50px;padding:12px 14px;border:1px solid #d8e3ef;border-radius:10px;background:#f7f9fc;font-size:16px;color:#17385e;box-shadow:none}
+.auth-modal .form-group input:focus,.reset-box input:focus{outline:3px solid #dceaff;border-color:#4682d8;background:white}
+.auth-modal .password-input-wrapper{position:relative;width:100%;display:block}.auth-modal .password-input-wrapper input{width:100%;padding-right:52px}
+.auth-modal .password-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:40px;width:40px;margin:0;border:0;border-radius:8px;background:transparent;color:#6b83a3;font-size:16px;cursor:pointer;display:grid;place-items:center}.auth-modal .password-toggle:hover{background:#e8eff9;color:#175dc5}
+.auth-modal .forgot-password-link{display:block;text-align:right;font-size:12px;color:#205daf;margin-top:-4px;text-decoration:none}
+.auth-modal .submit-btn,.reset-box .submit-btn{height:50px;border:0;border-radius:10px;background:#165ec9;color:#fff;font-weight:700;font-size:14px;box-shadow:0 5px 12px #165ec918;margin-top:8px;padding:12px;width:100%}.auth-modal .submit-btn:hover,.reset-box .submit-btn:hover{background:#104caa;transform:none}
+.auth-modal .divider{margin:22px 0;color:#8391a5;font-size:12px}.auth-modal .google-btn{height:50px;border:1px solid #d8e3ef;border-radius:10px;background:#fff;color:#284361;font-size:14px;box-shadow:none}.auth-modal .google-btn:hover{background:#f5f8fd;transform:none;border-color:#a4bddd}
+.auth-modal .password-requirements{background:#f3f7fc;border:0;border-radius:10px;padding:12px 14px;margin-top:12px}.auth-modal .requirements-list{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.auth-modal .requirement-item{font-size:11px;margin:0}.auth-modal .requirement-title{font-size:12px}
+.auth-modal :focus-visible{outline:3px solid #8db9fa;outline-offset:3px}
+.reset-container{background:linear-gradient(135deg,#eaf2fc,#f8fbff);padding:20px}.reset-box{max-height:none;margin:0}.reset-box .back-link a{font-size:13px;color:#235ca9}
+@media(max-width:540px){.auth-modal{padding:12px}.auth-modal .modal-content{padding:28px 24px;margin:12px auto;border-radius:20px;max-height:calc(100dvh - 48px)}.auth-modal .requirements-list{grid-template-columns:1fr}.reset-box{padding:28px 24px}.auth-modal .modal-content h2,.reset-box h1{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.auth-modal .modal-content{animation:none}}
+.auth-modal .password-toggle{width:62px;font:600 11px inherit;font-family:inherit;font-size:11px;font-weight:600;opacity:1}.auth-modal .password-input-wrapper input{padding-right:76px}.auth-modal .requirement-title::before{content:none}
+.auth-modal .password-toggle::before{content:none}
