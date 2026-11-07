@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="admin-routes.css">
     <link rel="stylesheet" href="notification.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="dashboard-v2.css?v=1"><link rel="stylesheet" href="admin-v2.css?v=1"><link rel="stylesheet" href="brand.css?v=1">
+<link rel="stylesheet" href="dashboard-v2.css?v=1"><link rel="stylesheet" href="admin-v2.css?v=2"><link rel="stylesheet" href="brand.css?v=1">
 </head>
 <body class="account-dashboard admin-dashboard">
     <nav class="navbar">
@@ -171,7 +171,7 @@
                     <h1>Mapa Ruta</h1>
                     <div class="filter-controls">
                         <select id="routeStatusFilter" class="filter-select">
-                            <option value="all">Sve Rute</option>
+                            <option value="all">Aktivni prijevozi</option>
                             <option value="pending">Na Čekanju</option>
                             <option value="confirmed">Potvrđeno</option>
                             <option value="completed">Završeno</option>
@@ -345,7 +345,7 @@
 
     <script src="notification.js?v=2"></script>
     <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="admin.js?v=3"></script>
+    <script type="module" src="admin.js?v=4"></script>
     <script>
         // Load Google Maps API for route visualization
         function loadGoogleMapsAdmin() {

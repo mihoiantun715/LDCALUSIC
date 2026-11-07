@@ -30,7 +30,8 @@
       ".github/**",
       ".vercel/**",
       ".firebase/**",
-      "assets/transport.jpg"
+      "assets/transport.jpg",
+      "tests/**"
     ],
     "rewrites": [
       {

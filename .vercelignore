@@ -19,3 +19,5 @@ outputs/
 
 .git/
 assets/transport.jpg
+
+tests/

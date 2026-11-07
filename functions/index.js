@@ -104,6 +104,8 @@ exports.sendStatusUpdateEmail = functions.firestore
   .onUpdate(async (change, context) => {
     const newData = change.after.data();
     const oldData = change.before.data();
+    // Linked transport stops are updated together; send one customer notice.
+    if (newData.bookingType === 'destination') return null;
     const bookingId = context.params.bookingId;
 
     // Only send email if status changed
